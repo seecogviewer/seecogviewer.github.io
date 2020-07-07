@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<!--The head section for scripts and libaries to be placed-->
+
+<head>
+    <title>JellyFish Explorer</title>
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!--jQuery-ui-->
+    <script src="external/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="external/jquery-ui-1.12.1.custom/jquery-ui.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!--Tabulator-->
+    <link href="https://unpkg.com/tabulator-tables@4.6.3/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.6.3/dist/js/tabulator.min.js"></script>
+
+    <!--dat gui-->
+    <script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
+
+    <!--ThreeJS-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/three@latest/examples/js/loaders/STLLoader.js"></script>
+
+    <!--AMI.JS-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js/0.0.22/ami.min.js"></script>
+    <script type="text/javascript" src="https://rawgit.com/FNNDSC/ami/dev/src/loaders/loaders.freesurfer.js"></script>
+
+    <!--Custom Javascript-->
+    <script src="js_scripts/variable_initiate.js"></script>
+    <script src="js_scripts/parsers.js"></script>
+    <script src="js_scripts/elecTable_maker.js"></script>
+
+    <!--Custom CSS-->
+    <link rel="stylesheet" href="layout.css">
+
+</head>
+
+<body>
+
+    <!--Navigation bar div-->
+    <div id="navigationBar">
+        <div class="navbar">
+            <div class="dropdown">
+                <button class="dropbtn">File
+                    <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="dropdown-content">
+                    <a href="#load" onclick="document.getElementById('load-bttn').click()">Load<input id="load-bttn"
+                            type="file" style="display: none;" multiple></a>
+                    <a href="#done" onclick="document.getElementById('load-bttn').click()">Close All<input id="close"
+                            type="file" style="display: none;"></a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn">About
+                    <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="dropdown-content">
+                    <a href="#">Github Page</a>
+                    <a href="#">HBML Website</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Viewing area div-->
+    <div id="workSpace">
+        <!--Tabulator table for electrode table div-->
+        <div id="elecTable-parent" class="workspace-div">
+
+            <!--Button Group for elecTable-->
+            <div id="elecTable-bttn-group">
+                <button id="elecTable-bttn-edit">Edit Mode</button>
+                <button id="elecTable-bttn-columns">Columns</button>
+            </div>
+
+            <!--The div for elecTable-->
+            <div id="elecTable"></div>
+        </div>
+        <!--3D viewer and 2D static image viewer div-->
+        <div id="viewArea" class="workspace-div">
+            <!--3D viewing div-->
+            <div id="threeDviewArea" class="viewarea-div">
+                <div id="sceneGui"></div>
+            </div>
+            <!--2D static image viewing div-->
+            <div id="staticViewArea" class="viewarea-div"></div>
+        </div>
+    </div>
+</body>
+
+</html>

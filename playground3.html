@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<!--The head section for scripts and libaries to be placed-->
+
+<head>
+    <title>JellyFish Explorer</title>
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!--Bootstrap-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!--jQuery-ui-->
+    <script src="external/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="external/jquery-ui-1.12.1.custom/jquery-ui.min.css">
+
+    <!--ThreeJS-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
+
+    <!--AMI.JS-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ami.js/0.0.22/ami.min.js"></script>
+    <script type="text/javascript" src="https://rawgit.com/FNNDSC/ami/dev/src/loaders/loaders.freesurfer.js"></script>
+
+    <!--dat gui-->
+    <script type="text/javascript" src="https://cdn.rawgit.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>
+
+    <!--stats-->
+    <script type="text/javascript" src="https://cdn.rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
+
+    <!--Tabulator-->
+    <link href="https://unpkg.com/tabulator-tables@4.5.3/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.5.3/dist/js/tabulator.min.js"></script>
+
+    <!--Spectrum Color Picker-->
+    <script src="external/spectrum-2.0.0/src/spectrum.js"></script>
+    <link rel="stylesheet" type="text/css" href="external/spectrum-2.0.0/src/spectrum.css">
+
+    <!--Custom Javascript and CSS scripts-->
+    <script src="js_scripts/variable_initiate.js"></script>
+    <script src="js_scripts/elecTable_maker.js"></script>
+    <script src="js_scripts/parsers.js"></script>
+    <link rel="stylesheet" href="style_w_bootstrap.css">
+
+</head>
+
+<body>
+
+    <!--Menu bar at the top of the page-->
+    <nav id="topnav" class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">File <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <!--<li><button id="btn-load" type="file" class="btn btn-block">Load</button></li>
+                        <li>
+                            <label class="btn btn-block">
+                                Load<input type="file" hidden>
+                            </label>
+                        </li>-->
+                        <li>
+                            <input type="file" class="custom-file-input" id="btn-load" style="display: none;">
+                            <label for="btn-load">Load File</label>
+
+                        </li>
+                        <li><button type="button" class="btn btn-block">Close All</button></li>
+                        <li><button type="button" class="btn btn-block">Load Me</button></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">View <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><button type="button" class="btn btn-block">Table+Viewer</button></li>
+                        <li><button type="button" class="btn btn-block">Table+Viewer+Statics</button></li>
+                        <li><button type="button" class="btn btn-block">Viewer Only</button></li>
+                    </ul>
+                </li>
+
+
+                <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">About <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><button type="button" class="btn btn-block">HBML Website</button></li>
+                        <li><button type="button" class="btn btn-block">Github Page</button></li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+
+    <!--div that contains the table and 3D viewer-->
+    <div class="row">
+
+        <!--Table div-->
+        <div id="elecTable" class="col-sm-6"></div>
+
+        <!--3Dviewer and static images div-->
+        <div id="viewArea" class="col-sm-6 container">
+            <div id="viewer" class="viewbox row">
+                <p>Hello</p>
+            </div>
+            <div id="statics" class="viewbox row">
+                <p>Young poopenheimer</p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

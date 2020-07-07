@@ -1,0 +1,35 @@
+* {
+    box-sizing: border-box;
+  }
+
+body,
+html {
+    height: 100%;
+}
+
+.main-container {
+    height: 100%;
+}
+
+/* Create three equal columns that floats next to each other */
+.main-col {
+    float: left;
+    width: 50%;
+    padding: 0px;
+}
+
+/* Clear floats after the columns */
+.main-container:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+#topnav {
+    margin-bottom: 0px;
+}
+
+#viewbox {
+    height: 50%;
+    display: block;
+}

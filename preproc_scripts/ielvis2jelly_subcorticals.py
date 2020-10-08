@@ -5,7 +5,7 @@ import json
 from os.path import isfile, isdir, join
 
 # Important filepaths
-fsDir = '/Volumes/NM01/HBML/derivatives/Freesurfer_Subjects/NS160'
+fsDir = '/Volumes/NM01/HBML/derivatives/Freesurfer_Subjects/NS161'
 subcortDir = join(fsDir,'subcorts')
 subcortDir_tmp = join(subcortDir,'tmp')
 os.makedirs(subcortDir_tmp)

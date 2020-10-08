@@ -207,22 +207,6 @@ function parseElecJson(idx, files, table) {
     );
 }
 
-function addText2Scene(text,txtParent) {
-    let geom = new THREE.TextBufferGeometry(text,{
-        font: font,
-        size: 1.5,
-        height: 0.1
-    });
-    let mat = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(txtParent.material.color.getStyle())
-    });
-    let textMesh = new THREE.Mesh(geom, mat);
-    textMesh.visible = threeTextObjs.Show;
-    txtParent.add(textMesh);
-    textMesh.position.z = 2; // Make sure the text doesn't overlap the electrode
-    threeTextObjs.push(textMesh.id);
-}
-
 function plusDivs(chng) {
     // First, index all of the ElecSlice elements
     //debugger;

@@ -104,24 +104,6 @@ $(document).ready(function () {
                         } else {
                             elecGeom = new THREE.SphereBufferGeometry(1, 32, 32);
                         }
-                        //debugger;
-
-                        // Determine elec color
-                        /*randNum = Math.floor((Math.random() * 20) + 1);
-                        var elecColor;
-                        if (randNum == 1) {
-                            elecColor = elecSettings.functional.motor;
-                        } else if (randNum == 2) {
-                            elecColor = elecSettings.functional.sensory;
-                        } else if (randNum == 3) {
-                            elecColor = elecSettings.functional.visual;
-                        } else if (randNum == 4) {
-                            elecColor = elecSettings.functional.auditory;
-                        } else if (randNum == 5) {
-                            elecColor = elecSettings.functional.language;
-                        } else {
-                            elecColor = elecSettings.functional.none;
-                        }*/
 
                         // Determine elec color based on associated function
                         let elecColor;
@@ -221,16 +203,9 @@ $(document).ready(function () {
                 row.toggleSelect();
             })
         },
-        //groupBy: ["subid", "gridid"],
-        //groupStartOpen: [true, true],
+        groupBy: ["gridid"],
+        groupStartOpen: [false],
         columns: [
-            /*{
-                title: "SubID",
-                field: "subid",
-                visible: true,
-                headerFilter: "input",
-                editable: false
-            },*/
             {
                 title: "elecID",
                 field: "elecid",
@@ -251,19 +226,6 @@ $(document).ready(function () {
                 formatter: "tickCross",
                 editable: false,
                 editor: true,
-                /*editorParams: {
-                    values: {
-                        true: true,
-                        false: false
-                    }
-                },
-                headerFilter: true,
-                headerFilterParams: {
-                    values: {
-                        true: true,
-                        false: false
-                    }
-                }*/
             },
             {
                 title: "Anat",

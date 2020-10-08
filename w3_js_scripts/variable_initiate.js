@@ -48,11 +48,11 @@ var viewer_3d = {
 
 // Set colors and shapes for each type of electrode
 var elecSettings = {
-    semiology: {
-        soz_spikey: 'box',
-        soz: 'tetrahedron',
-        spikey: 'cylinder',
-        none: 'sphere'
+    ictal: {
+        soz_spikey: new THREE.BoxBufferGeometry(2, 2, 2),
+        soz: new THREE.TetrahedronBufferGeometry(2, 0),
+        spikey: new THREE.DodecahedronBufferGeometry(2, 0),
+        none: new THREE.SphereBufferGeometry(1, 32, 32)
     },
     functional: {
         motor: '#186aed',

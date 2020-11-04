@@ -1,0 +1,98 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+#navBar {
+    margin: 0;
+    padding: 0;
+}
+#workSpace {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    height: 95%;
+}
+.w3-container {
+    padding: 0;
+    margin: 0;
+}
+
+/* Default layout with static images underneath table */
+.defaultView #elecTable-parent {
+    width: 50%;
+    height: 100%;
+}
+.defaultView #threeDviewArea {
+    width: 50%;
+    height: 100%;
+}
+.defaultView #elecSlideshow {
+    height: 50%;
+}
+.defaultView .ElecSlice {
+    padding: 20px 0px 0px 0px;
+    object-fit: scale-down;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    display: none;
+}
+.defaultView #elecTable {
+    height: 50%;
+    padding: 0;
+}
+.defaultView #elecStatic {
+    display: none;
+}
+
+
+/* Layout #2 of three equally sized columns */
+.threeCol #elecTable-parent {
+    width: 33%;
+    height: 100%;
+}
+.threeCol #threeDviewArea {
+    width: 33%;
+    height: 100%;
+}
+.threeCol #elecSlideshow {
+    display: none;
+}
+.threeCol .ElecSlice {
+    padding: 20px 0px 0px 0px;
+    object-fit: scale-down;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+.threeCol #elecTable {
+    height: 100%;
+    padding: 0;
+}
+.threeCol #elecStatic {
+    width: 33%;
+    height: 100%;
+    overflow: auto;
+    display: block;
+}
+
+
+
+
+
+/* Divs within the 3D viewing area */
+#sceneGui {
+    z-index: 3;
+    position: fixed;
+    max-width: 10%;
+    right: 0;
+}
+#elecLegend img {
+    z-index: 2;
+    position: fixed;
+    height: 200px;
+}
+

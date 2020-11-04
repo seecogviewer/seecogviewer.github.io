@@ -4,13 +4,23 @@ var threeTextObjs = [];
 threeTextObjs.Text = true;
 threeTextObjs.Legend = true;
 var slideIndex = 0;
+var camera;
+var overlay;
+
+var viewModes = {
+    defaultView : {imgPane : "elecSlideshow"},
+    threeCol : {imgPane : "elecStatic"}
+};
+var currentViewMode = 'defaultView';
+
+var brainVol;
 
 // Variable to hold info and different types of files and how to handle them
 var dtypes = {
     'FSmesh': {
         'filename': [],
         'filedata': [],
-        'extensions': ['pial', 'inflated','srf','thalamus','caudate','putamen','pallidum','hippocampus','amygdala']
+        'extensions': ['pial', 'inflated','srf','thalamus','caudate','putamen','pallidum','hippocampus','amygdala','white']
     },
     'STL': {
         'filename': [],
@@ -31,7 +41,12 @@ var dtypes = {
         'filename': [],
         'filedata': [],
         'extensions': ['nii', 'nii.gz', 'mgz', 'mgh', 'gz']
-    }
+    },
+    'overlay': {
+        'filename': [],
+        'filedata': [],
+        'extensions': ['overlay']
+    },
 };
 
 // THREE.JS helper variable
@@ -73,7 +88,8 @@ var surfColors = {
     putamen: '#b0f0a1', // mint
     thalamus: '#ff66b5', // hot pink
     pial: '#787878', // Gray
-    inflated: '#787878' // Gray
+    inflated: '#787878', // Gray
+    white: '#787878' // Gray
 }
 
 function viewer_3d_init() {
@@ -94,7 +110,8 @@ function viewer_3d_init() {
     scene = new THREE.Scene();
 
     // ThreeJS camera
-    const camera = new THREE.PerspectiveCamera(45, threeD.clientWidth / threeD.clientHeight, 0.1, 1000);
+    //const camera = new THREE.PerspectiveCamera(45, threeD.clientWidth / threeD.clientHeight, 1, 1000);
+    camera = new THREE.PerspectiveCamera(45, threeD.clientWidth / threeD.clientHeight, 1, 1000);
     camera.position.x = 250;
     camera.position.y = 250;
     camera.position.z = 250;

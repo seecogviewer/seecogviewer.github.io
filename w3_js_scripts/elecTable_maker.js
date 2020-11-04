@@ -22,6 +22,10 @@ $(document).ready(function () {
                 parseFSMesh(i, e.target.files, threeD, scene);
             } else if (dtypes['electrodes']['extensions'].indexOf(_fext) >= 0) {
                 parseElecJson(i, e.target.files, elecTable); //parse as electrodes json file
+            } else if (dtypes['overlay']['extensions'].indexOf(_fext) >= 0) {
+                parseOverlay(i, e.target.files, elecTable); //parse as electrodes json file
+            } else if (dtypes['volumes']['extensions'].indexOf(_fext) >= 0) {
+                parseVolume(i, e.target.files, threeD, scene);
             } else if (dtypes['STL']['extensions'].indexOf(_fext) >= 0) {
                 if (!viewer_3d.on) {
                     viewer_3d_init();
@@ -139,14 +143,18 @@ $(document).ready(function () {
                         addText2Scene(elecMesh.name, elecMesh);
                     }
 
-                    if (document.getElementById('elecSlideshow').style.display !== 'none' && row.getData().hasOwnProperty('PICS')) {
+                    let imgPaneNow = viewModes[currentViewMode]['imgPane'];
+
+                    //if (document.getElementById('elecSlideshow').style.display !== 'none' && row.getData().hasOwnProperty('PICS')) {
+                    if (document.getElementById(imgPaneNow).style.display !== 'none' && row.getData().hasOwnProperty('PICS')) {
                         let picsData = row.getData().PICS;
                         if (picsData !== 'NaN') {
                             let newImage = document.createElement("IMG");
                             newImage.src = picsData;
                             newImage.className = 'ElecSlice';
                             newImage.classList.add('w3-display-center');
-                            document.getElementById("elecSlideshow").appendChild(newImage);
+                            document.getElementById(imgPaneNow).appendChild(newImage);
+                            //document.getElementById("elecSlideshow").appendChild(newImage);
 
                             // Check if need to toggle the slide buttons being disabled
                             if (document.getElementsByClassName('slidebttn')[0].classList.contains('w3-disabled')) {
@@ -165,13 +173,16 @@ $(document).ready(function () {
                                     newImage.remove()
 
                                     // Do we need to disable the buttons for slideshow?
-                                    if (document.getElementsByClassName("ElecSlice").length === 0) {
-                                        document.getElementsByClassName('slidebttn')[0].classList.add("w3-disabled");
-                                        document.getElementsByClassName('slidebttn')[1].classList.add("w3-disabled");
-                                        document.getElementsByClassName('slidebttn')[0].disabled = true;
-                                        document.getElementsByClassName('slidebttn')[1].disabled = true;
-                                    } else {
-                                        plusDivs(-1);
+                                    if (currentViewMode == 'defaultView') {
+                                        //if (document.getElementsByClassName("ElecSlice").length === 0) {
+                                        if (document.getElementById(imgPaneNow).childNodes.length === 0) {
+                                            document.getElementsByClassName('slidebttn')[0].classList.add("w3-disabled");
+                                            document.getElementsByClassName('slidebttn')[1].classList.add("w3-disabled");
+                                            document.getElementsByClassName('slidebttn')[0].disabled = true;
+                                            document.getElementsByClassName('slidebttn')[1].disabled = true;
+                                        } else {
+                                            plusDivs(-1);
+                                        }
                                     }
                                 }
                             }
@@ -183,12 +194,12 @@ $(document).ready(function () {
     ]
 
     // Create a new tabulator style table
-    elecTable = new Tabulator("#elecTable", {
+    elecTable = new Tabulator("#elecTableChild", {
         //data: tabulatorData,
         placeholder: "Waiting for electrode json file",
         //layout:"fitColumns",
         layout: "fitData",
-        height: "50%",
+        height: "100%",
         resizableColumns: true,
         selectablePersistence: false,
         columnMinWidth: 10,

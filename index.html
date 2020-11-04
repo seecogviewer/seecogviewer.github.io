@@ -27,12 +27,14 @@
     <!--ThreeJS-->
     <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>-->
     <script type="text/javascript" src="external/three.js"></script>
+    <script type="text/javascript" src="external/Lut.js"></script>
 
     <!--ThreeJS TTF Loader-->
     <!--<script type="text/javascript" src="https://github.com/mrdoob/three.js/blob/master/examples/js/loaders/TTFLoader.js"></script>-->
 
     <!--AMI.JS-->
-    <script type="text/javascript" src="external/ami.min.js"></script>
+    <!--<script type="text/javascript" src="external/ami.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ami.js/0.33.0/ami.js" integrity="sha512-kLrPMhGGqqiZusj/hBuKiqaKmuu0ji0fjr9C3rDpLnxnN/ytUlBftGlicotGT2laImlZuavNUFuQ/jdVWKWNjQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" src="external/loaders.freesurfer.js"></script>
 
     <!--Custom Javascript-->
@@ -40,6 +42,7 @@
     <script src="w3_js_scripts/threejs_functions.js"></script>
     <script src="w3_js_scripts/parsers.js"></script>
     <script src="w3_js_scripts/elecTable_maker.js"></script>
+    <script src="w3_js_scripts/viewChanger.js"></script>
 
     <!--Text-->
     <script type="text/javascript" src="external/font/helvetiker_regular.typeface.js"></script>
@@ -47,62 +50,9 @@
     <!--Legend for electrodes-->
     <script type="text/javascript" src="./elecLegendImg.js"></script>
 
-    <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-        #navBar {
-            margin: 0;
-            padding: 0;
-        }
-        #workSpace {
-            width: 100%;
-            padding: 0;
-            margin: 0;
-            height: 95%;
-        }
-        #elecTable-parent {
-            width: 50%;
-            height: 100%;
-        }
-        #threeDviewArea {
-            width: 50%;
-            height: 100%;
-        }
-        #elecTable {
-            height: 50%;
-            padding: 0;
-        }
-        #elecSlideshow {
-            height: 50%;
-        }
-        #sceneGui {
-            z-index: 3;
-            position: fixed;
-            max-width: 10%;
-            right: 0;
-        }
-        #elecLegend img {
-            z-index: 2;
-            position: fixed;
-            height: 200px;
-        }
-        .ElecSlice {
-            padding: 20px 0px 0px 0px;
-            object-fit: scale-down;
-            width: 80%;
-            margin-left: auto;
-            margin-right: auto;
-            display: none;
-        }
-        .w3-container {
-            padding: 0;
-            margin: 0;
-        }
-    </style>
+    <!--Custom css-->
+    <link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
@@ -130,8 +80,8 @@
                     <i class="fa fa-caret-down"></i>
                 </button>
                 <div class="w3-dropdown-content w3-bar-block w3-card-4">
-                    <a href="#" class="w3-bar-item w3-button">3D Main</a>
-                    <a href="#" class="w3-bar-item w3-button">3D + Static Images</a>
+                    <a href="#" class="w3-bar-item w3-button" onclick="changeView('defaultView')">3D Main</a>
+                    <a href="#" class="w3-bar-item w3-button" onclick="changeView('threeCol')">3D + Static Images</a>
                 </div>
             </div>
 
@@ -158,16 +108,21 @@
     </div>
 
     <!--Second part of page: Table and Images+3D-->
-    <div id="workSpace" class="w3-container">
+    <div id="workSpace" class="w3-container defaultView">
         
         <!--The Table-->
         <div id="elecTable-parent" class="w3-left">
-            <div id="elecTable" class="w3-container w3-red"></div>
+            <div id="elecTable" class="w3-container w3-red">
+                <div id="elecTableChild"></div>
+            </div>
             <div id="elecSlideshow" class="w3-container w3-purple w3-content w3-display-container">
                 <button class="w3-button w3-black w3-display-left w3-disabled slidebttn" onclick="plusDivs(-1)" disabled>&#10094;</button>
                 <button class="w3-button w3-black w3-display-right w3-disabled slidebttn" onclick="plusDivs(1)" disabled>&#10095;</button>
             </div>
         </div>
+
+        <!--Div to view static images verticall stacked-->
+        <div id="elecStatic" class="w3-container w3-left w3-yellow"></div>
         
         <!--3D View Area-->
         <div id="threeDviewArea" class="w3-green w3-left">

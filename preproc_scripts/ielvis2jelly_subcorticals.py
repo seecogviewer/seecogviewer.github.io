@@ -2,12 +2,29 @@
 from nibabel.freesurfer.io import read_geometry, write_geometry
 import os
 import json
+import shutil
+import sys
 from os.path import isfile, isdir, join
 
+# Determine if input is full file path to freesurfer subject or just the subject ID
+subInput = sys.argv[1]
+
+if not isdir(subInput):
+    SUBJECTS_DIR = os.environ['SUBJECTS_DIR']
+    fsDir = SUBJECTS_DIR + os.sep + subInput
+else:
+    fsDir = subInput
+
+if not isdir(fsDir):
+    print('Can not find %s' % fsDir)
+else:
+    print('=========>Using %s' % fsDir)
+
+
 # Important filepaths
-fsDir = '/Volumes/NM01/HBML/derivatives/Freesurfer_Subjects/NS161'
 subcortDir = join(fsDir,'subcorts')
 subcortDir_tmp = join(subcortDir,'tmp')
+jellyfish_dataDir = join(fsDir,'elec_recon','JellyFish','data')
 os.makedirs(subcortDir_tmp)
 # Dictionary of labels and corresponding values
 subcort_dict = {
@@ -32,7 +49,8 @@ for subc in subcort_dict.keys():
     pretessF = subcortDir_tmp + os.sep + subc + '_pretess.mgz'
     tessF = subcortDir_tmp + os.sep + subc + '_tess.lab'
     smoothF = subcortDir_tmp + os.sep + subc + '_tess.smooth'
-    subcortF = subcortDir + os.sep + subc.lower().replace('_','h.')
+    #subcortF = subcortDir + os.sep + subc.lower().replace('_','h.')
+    subcortF = jellyfish_dataDir + os.sep + subc.lower().replace('_','h.')
 
     # Pretess
     pretess_cmd_tmp = ['mri_pretess', join(fsDir,'mri','aseg.mgz'), subcort_dict[subc]['id'], join(fsDir,'mri','norm.mgz'), pretessF]
@@ -53,3 +71,5 @@ for subc in subcort_dict.keys():
     # By default the above freesurfer commands output the mesh in a funky, hard to read file format
     coords,faces = read_geometry(smoothF)
     write_geometry(subcortF,coords,faces)
+
+shutil.rmtree(subcortDir)

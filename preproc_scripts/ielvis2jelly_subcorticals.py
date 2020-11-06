@@ -24,7 +24,7 @@ else:
 # Important filepaths
 subcortDir = join(fsDir,'subcorts')
 subcortDir_tmp = join(subcortDir,'tmp')
-jellyfish_dataDir = join(fsDir,'elec_recon','JellyFish','data')
+jellyfish_dataDir = join(fsDir,'elec_recon','JellyFish2','data')
 os.makedirs(subcortDir_tmp)
 # Dictionary of labels and corresponding values
 subcort_dict = {

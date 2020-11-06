@@ -1,3 +1,49 @@
+/*function resetDir(obj,pdir) {
+    return obj.slice.planeDirection = pdir
+}*/
+
+// Make subfolders for volume function
+function planeController(obj,name,axes,parentFolder) {
+    //debugger;
+    var planeFolder = parentFolder.addFolder(name);
+    let origDir = obj.slice.planeDirection;
+    //debugger;
+    planeFolder.add(obj, 'index', 0, obj.orientationMaxIndex, 1).name('Slice').listen();
+    for (ax of axes) {
+        planeFolder.add(obj.slice.planeDirection,ax,-5,5,0.1).name('Rotate' + ax.toUpperCase()).onChange(function(newVal){
+            //debugger;
+            obj.slice.planeDirection = new THREE.Vector3().set(this.object.x,this.object.y,this.object.z);
+            obj.border.helpersSlice = obj.slice;
+        });
+    }
+    
+    planeFolder.add(obj,'visible').name('Visible');
+    return planeFolder;
+}
+
+function plane2Scene(cfg,volFolder) {
+    cfg.obj.name = cfg.Name;
+    cfg.obj.border.color = cfg.color;
+    cfg.obj.children[0].visible = false;
+    cfg.obj.orientation = cfg.ori;
+
+    // Build dat.gui folder for it
+    var planeFolder = parentFolder.addFolder(cfg.Name);
+    planeFolder.add(cfg.obj, 'index', 0, cfg.obj.orientationMaxIndex, 1).name('Slice').listen();
+    for (ax of axes) {
+        planeFolder.add(cfg.obj.slice.planeDirection,ax,-1,1,0.1).name('Rotate' + ax.toUpperCase()).onChange(function(newVal){
+            //debugger;
+            cfg.obj.slice.planeDirection = new THREE.Vector3().set(this.object.x,this.object.y,this.object.z);
+            cfg.obj.border.helpersSlice = cfg.obj.slice;
+        });
+    }
+    planeFolder.add(cfg.obj,'visible',true).name('Visible').listen();
+    scene.add(cfg.obj);
+    return planeFolder;
+
+}
+
+
 /**
  * parse Freesurfer Mesh files
  */
@@ -122,20 +168,23 @@ function parseVolume(idx, files, container, fuzz) {
             sHelper.orientation = 0;
             var volFolder = sceneGui.addFolder('Volume');
             const orients = {
-                'Coronal': {'o': 0, 'obj': new AMI.StackHelper(stackT1), 'color': 0xff0000},
-                'Saggital': {'o': 1, 'obj': new AMI.StackHelper(stackT1), 'color': 0x00ff00},
-                'Axial': {'o': 2, 'obj': new AMI.StackHelper(stackT1), 'color': 0x0000ff}
+                'Coronal': {'ori': 0, 'obj': new AMI.StackHelper(stackT1), 'color': 0xff0000,'axes': ['x','y']},
+                'Saggital': {'ori': 1, 'obj': new AMI.StackHelper(stackT1), 'color': 0x00ff00, 'axes': ['y','z']},
+                'Axial': {'ori': 2, 'obj': new AMI.StackHelper(stackT1), 'color': 0x0000ff, 'axes': ['x','z']}
             };
-            for (o in orients) {
-                //debugger;
-                orients[o]['obj'].name = o;
-                //orients[o]['obj'].bbox.color = 0xff0000;
-                orients[o]['obj'].border.color = orients[o]['color'];
-                orients[o]['obj'].children[0].visible = false;
-                orients[o]['obj'].orientation = orients[o]['o'];
-                //sHelper.orientation = orients[o];
-                volFolder.add(orients[o]['obj'], 'index', 0, orients[o]['obj'].orientationMaxIndex, 1).name(o).listen();
-                scene.add(orients[o]['obj']);
+
+            /*const orients = [
+                {'Name': 'Coronal', 'ori': 0, 'obj': new AMI.StackHelper(stackT1), 'color': 0xff0000,'axes': ['x','y']},
+                {'Name': 'Saggital','ori': 1, 'obj': new AMI.StackHelper(stackT1), 'color': 0x00ff00, 'axes': ['y','z']},
+                {'Name': 'Axial','ori': 2, 'obj': new AMI.StackHelper(stackT1), 'color': 0x0000ff, 'axes': ['x','z']}
+            ];*/
+            for (plane in orients) {
+                orients[plane]['obj'].name = plane;
+                orients[plane]['obj'].border.color = orients[plane]['color'];
+                orients[plane]['obj'].children[0].visible = false;
+                orients[plane]['obj'].orientation = orients[plane]['ori'];
+                planeController(orients[plane]['obj'],plane,orients[plane]['axes'],volFolder);
+                scene.add(orients[plane]['obj']);
             }
 
             //debugger;

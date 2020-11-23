@@ -1,4 +1,4 @@
-f = '/Volumes/NM01/HBML/derivatives/Freesurfer_Subjects/NS163/elec_recon/JellyFish2/data/FingerTapping_overlay.mgh'
+f = '/Volumes/NM01/HBML/derivatives/fMRI-DTI/NS164/ses-preimplant01/FingerTapping.feat/reg_surf-lh-NS164/stats/zstat1.mgh'
 
 import nibabel as nib
 import json
@@ -14,6 +14,6 @@ output = {
 
 outputTxt = json.dumps(output)
 
-with open('lh_F.overlay','w') as fo:
+with open('NS164_lh_FingerTapping.overlay','w') as fo:
     fo.write(outputTxt)
 

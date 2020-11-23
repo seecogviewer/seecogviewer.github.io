@@ -1,6 +1,4 @@
-/*function resetDir(obj,pdir) {
-    return obj.slice.planeDirection = pdir
-}*/
+
 
 // Make subfolders for volume function
 function planeController(obj,name,axes,parentFolder) {
@@ -10,7 +8,7 @@ function planeController(obj,name,axes,parentFolder) {
     //debugger;
     planeFolder.add(obj, 'index', 0, obj.orientationMaxIndex, 1).name('Slice').listen();
     for (ax of axes) {
-        planeFolder.add(obj.slice.planeDirection,ax,-5,5,0.1).name('Rotate' + ax.toUpperCase()).onChange(function(newVal){
+        planeFolder.add(obj.slice.planeDirection,ax,-Math.PI*2,Math.PI*2,0.1).name('Rotate' + ax.toUpperCase()).onChange(function(newVal){
             //debugger;
             obj.slice.planeDirection = new THREE.Vector3().set(this.object.x,this.object.y,this.object.z);
             obj.border.helpersSlice = obj.slice;
@@ -354,6 +352,64 @@ function parseOverlay(idx, files, table) {
             //debugger;
             let parsedText = JSON.parse(rawText);
             overlay = parsedText;
+            
+
+            // This will eventually have to go, but for now it's ok
+            let meshName = parsedText.mesh;
+            let meshController = sceneGui.__folders['Surfaces'].__folders[meshName];
+            let l = meshController.__controllers.length;
+            for (var ii = 0; ii < l; ii++) {meshController.__controllers[0].remove();}
+
+            let funcLut = new THREE.Lut('cooltowarm',200);
+            funcLut.setMin(Math.min(...parsedText.data));
+            funcLut.setMax(Math.max(...parsedText.data));
+            const verts = ['a','b','c'];
+
+            var obj = scene.getObjectByName(meshName);
+            let cols = parsedText.data.map(function(n){return funcLut.getColor(n)}); 
+            obj.geometry.faces.forEach(function(f){
+                var jj = 0;
+                for(v of verts) {
+                    f.vertexColors[jj] = ( cols[f[v]] );
+                    jj++;
+                }
+            });
+
+            var newMat = new THREE.MeshLambertMaterial({
+                vertexColors: THREE.VertexColors,
+                transparent: true
+            });
+            obj.material = newMat;
+            obj.geometry.colorsNeedUpdate = true;
+            obj.geometry.elementsNeedUpdate = true;
+
+            meshController.add(newMat,'opacity',0,1).name('Opacity').listen();
+            var minSlider = meshController.add(funcLut,'minV',funcLut.minV, funcLut.maxV).name('Min').listen();
+            minSlider.onChange(function(newMin){
+                let newColors = parsedText.data.map(function(n){ return n > newMin ? funcLut.getColor(n) : new THREE.Color(0.5,0.5,0.5)});
+                obj.geometry.faces.forEach(function(f){
+                    var kk = 0;
+                    for(v of verts) {
+                        f.vertexColors[kk] = ( newColors[f[v]] );
+                        kk++;
+                    }
+                });
+                obj.geometry.colorsNeedUpdate = true;
+                obj.geometry.elementsNeedUpdate = true;
+            })
+            var maxSlider = meshController.add(funcLut,'maxV',funcLut.minV, funcLut.maxV).name('Max').listen();
+            maxSlider.onChange(function(newMax){
+                let newColors = parsedText.data.map(function(n){ return n < newMax ? funcLut.getColor(funcLut.maxV) : funcLut.getColor(n)});
+                obj.geometry.faces.forEach(function(f){
+                    var kk = 0;
+                    for(v of verts) {
+                        f.vertexColors[kk] = ( newColors[f[v]] );
+                        kk++;
+                    }
+                });
+                obj.geometry.colorsNeedUpdate = true;
+                obj.geometry.elementsNeedUpdate = true;
+            })
         })
         .catch(function (error) {
             window.console.log('oops... something went wrong...');

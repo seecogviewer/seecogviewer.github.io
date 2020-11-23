@@ -110,7 +110,8 @@ $(document).ready(function () {
                         }
 
                         // Determine elec color based on associated function
-                        let elecColor;
+                        let elecColor = new THREE.Color(rowData.color);
+                        /*let elecColor;
                         if (rowData.motor) {
                             elecColor = elecSettings.functional.motor;
                         } else if (rowData.sensory) {
@@ -125,7 +126,7 @@ $(document).ready(function () {
                             elecColor = elecSettings.functional.language;
                         } else {
                             elecColor = elecSettings.functional.none;
-                        }
+                        }*/
 
                         const coords = rowData.lepto;
                         //const elecShpere = new THREE.SphereBufferGeometry(2, 32, 32);

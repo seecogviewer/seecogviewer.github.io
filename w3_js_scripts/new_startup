@@ -1,0 +1,132 @@
+// Object with everything
+var sc = {
+    elecTable: [],
+    scenes: {
+        threed: {
+            scene: null,
+            camera: null,
+            renderer: null,
+            orientation: "3D",
+            domID: null,
+            controls: null,
+            color: null,
+            on: false
+        },
+        axial: {
+            scene: null,
+            camera: null,
+            renderer: null,
+            orientation: "3D",
+            domID: null,
+            controls: null,
+            color: null,
+            on: false
+        },
+        saggital: {
+            scene: null,
+            camera: null,
+            renderer: null,
+            orientation: "3D",
+            domID: null,
+            controls: null,
+            color: null,
+            on: false
+        },
+        coronal: {
+            scene: null,
+            camera: null,
+            renderer: null,
+            orientation: "3D",
+            domID: null,
+            controls: null,
+            color: null,
+            on: false
+        }
+    },
+    datGui: {
+        obj: new dat.GUI({
+            autoPlace: true,
+            width: 200,
+            resizable: false
+         }),
+         domID: 'sceneGui'
+    },
+    elecSetting: {
+        ictal: {
+            soz_spikey: new THREE.BoxBufferGeometry(2, 2, 2),
+            soz: new THREE.TetrahedronBufferGeometry(2, 0),
+            spikey: new THREE.DodecahedronBufferGeometry(2, 0),
+            none: new THREE.SphereBufferGeometry(1, 32, 32)
+        },
+        functional: {
+            motor: '#186aed',
+            sensory: '#148c34',
+            visual: '#cfaf23',
+            auditory: '#a616a8',
+            language: '#d5e800',
+            none: '#ff0008'
+        }
+    },
+    surfColors: {
+        amygdala: '#e09f9f', // pink/beige
+        hippocampus: '#0a3c7d', // navy blue
+        pallidum: '#5e4b45', // brown
+        caudate: '#edf779', // yellow
+        putamen: '#b0f0a1', // mint
+        thalamus: '#ff66b5', // hot pink
+        pial: '#787878', // Gray
+        inflated: '#787878', // Gray
+        white: '#787878' // Gray
+    },
+    data: [],
+    viewModes: {
+        current: 'default',
+        options: ['default','threeCol'],
+    },
+    font: new THREE.FontLoader().parse(rawText),
+    dtypes: {
+        'FSmesh': {
+            'filename': [],
+            'filedata': [],
+            'extensions': ['pial', 'inflated','srf','thalamus','caudate','putamen','pallidum','hippocampus','amygdala','white']
+        },
+        'STL': {
+            'filename': [],
+            'filedata': [],
+            'extensions': ['stl']
+        },
+        'GLTF': {
+            'filename': [],
+            'filedata': [],
+            'extensions': ['gltf','glb']
+        },
+        'electrodes': {
+            'filename': [],
+            'filedata': [],
+            'extensions': ['json']
+        },
+        'volumes': {
+            'filename': [],
+            'filedata': [],
+            'extensions': ['nii', 'nii.gz', 'mgz', 'mgh', 'gz']
+        },
+        'overlay': {
+            'filename': [],
+            'filedata': [],
+            'extensions': ['overlay']
+        }
+    }
+};
+
+// staticImg object to be shown in static image panes
+class staticImg extends HTMLImageElement {
+    constructor() {
+        super();
+        this.className = 'staticImg';
+        this.onclick = function(event) {
+            if (event.shiftKey) {
+                this.remove();
+            }
+        }
+    }
+}

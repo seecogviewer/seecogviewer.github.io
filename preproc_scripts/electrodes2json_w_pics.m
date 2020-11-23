@@ -1,9 +1,9 @@
 var_names = {'subid' 'elecid' 'ElecType' 'Hem' 'lepto' 'depthpial' 'dist' 'soz' 'spikey' 'anat' 'gridid'};
-subid = 'NS165';
+subid = 'NS166';
 %allElecs = new_output.table;
 %row_indices = match_str(allElecs.SubID, subid);
 %sub_elecs = allElecs(row_indices,:);
-output = ielvisImport('NS165',0); sub_elecs = output.table;
+output = ielvisImport('NS166'); sub_elecs = output.table;
 
 [gridNames gridNums] = regexp(sub_elecs.Contact,'[A-Za-z]*[^\d*]','match','split');
 ini_gridNames=cell(length(gridNames),1);

@@ -17,8 +17,9 @@ aparcAsegFile = join(fsDir,'mri','aparc+aseg.mgz')
 fslutFile = 'FreeSurferColorLUTnoFormat.txt'
 
 # Importing the data
-apas = nib.load(aparcAsegFile)
-zdim = a.shape[2]
+apasObj = nib.load(aparcAsegFile)
+apas = apasObj.get_fdata()
+zdim = apas.shape[2]
 
 #region Import Freesurfer LUT
 lutDict = {
@@ -58,7 +59,7 @@ elecDict = {
 
 # Read in electrodeNames starting from correct line
 hdrLine = 'Name, Depth/Strip/Grid, Hem\n'
-f = open(elecnamesFile,'r')
+f = open(elecNamesFile,'r')
 isHdr = True
 for thisLine in f:
     if isHdr:
@@ -101,8 +102,8 @@ f.close()
 # Go through each electrode and get the anatomical location
 for ee in range(len(elecList)):
     c = elecList[ee]['coords']
-    c1 = [round(c[0]), round(c[1]), round(zdim-c[2])]
-    anatCode = a[c1[0]][c1[1]][c1[2]]
+    c1 = [round(c[1]), round(c[0]), round(zdim-c[2])]
+    anatCode = apas[ c1[0], c1[1], c1[2] ]
     anatLoc = lut.loc[anatCode,'anat']
     elecList[ee]['anat'] = anatLoc
 

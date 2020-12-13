@@ -38,7 +38,6 @@ function plane2Scene(cfg,volFolder) {
     planeFolder.add(cfg.obj,'visible',true).name('Visible').listen();
     scene.add(cfg.obj);
     return planeFolder;
-
 }
 
 
@@ -68,7 +67,7 @@ function parseFSMesh(idx, files, container, scene) {
         .then(function (brainVol) {
             let surfExt = files[idx].name.split('.')[1];
             let currentColor = {
-                color: surfColors[surfExt]
+                color: sc.surfColors[surfExt]
             };
             const material = new THREE.MeshLambertMaterial({
                 color: currentColor.color, //'rgb(120,120,120)',
@@ -92,6 +91,7 @@ function parseFSMesh(idx, files, container, scene) {
 
 
             //debugger;
+            let surfFolder = sc.datGui.objs.surf;
             meshFolder = surfFolder.addFolder(files[idx].name);
             meshFolder.add(material, 'opacity', 0, 1).name('Opacity'); // Add folder to viewerGui for this mesh
             var colorchanger = meshFolder.addColor(currentColor, 'color').name("color");
@@ -108,7 +108,7 @@ function parseFSMesh(idx, files, container, scene) {
                 0, 0, 1, 0, 
                 0, 0, 0, 1);
             mesh.applyMatrix(RASToLPS);*/
-            scene.add(mesh);
+            sc.scenes.threeD.scene.add(mesh);
         })
         .catch(function (error) {
             window.console.log('oops... something went wrong...');
@@ -164,7 +164,8 @@ function parseVolume(idx, files, container, fuzz) {
             sHelper.border.color = 0x00ff00;
             sHelper.children[0].visible = false;
             sHelper.orientation = 0;
-            var volFolder = sceneGui.addFolder('Volume');
+            let volFolder = sc.datGui.objs.parent.addFolder('Volume');
+            sc.datGui.objs.vol = volFolder;
             const orients = {
                 'Coronal': {'ori': 0, 'obj': new AMI.StackHelper(stackT1), 'color': 0xff0000,'axes': ['x','y']},
                 'Saggital': {'ori': 1, 'obj': new AMI.StackHelper(stackT1), 'color': 0x00ff00, 'axes': ['y','z']},
@@ -182,7 +183,7 @@ function parseVolume(idx, files, container, fuzz) {
                 orients[plane]['obj'].children[0].visible = false;
                 orients[plane]['obj'].orientation = orients[plane]['ori'];
                 planeController(orients[plane]['obj'],plane,orients[plane]['axes'],volFolder);
-                scene.add(orients[plane]['obj']);
+                sc.scenes.threeD.scene.add(orients[plane]['obj']);
             }
 
             //debugger;
@@ -282,6 +283,7 @@ function parseElecJson(idx, files, table) {
         })
         .then(function (elecData) {
             //debugger;
+            let elecTable = sc.elecTable.obj;
             elecTable.setData(elecData)
                 .then(function () {
                     document.getElementById("selectElecs").classList.remove("w3-disabled");

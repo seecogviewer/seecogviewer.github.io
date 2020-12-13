@@ -17,3 +17,16 @@ outputTxt = json.dumps(output)
 with open('NS164_lh_FingerTapping.overlay','w') as fo:
     fo.write(outputTxt)
 
+fsDir = '/Volumes/NM01/HBML/derivatives/Freesurfer_Subjects/NS167'
+from seecog import seecog
+s = seecog(fsDir)
+s.create_seecog_dir()
+s.copy_seecog_files()
+
+s.findAnat()
+s.runAll()
+
+s.import_ielvis()
+
+s.write_elecData()
+s.create_subcorts()

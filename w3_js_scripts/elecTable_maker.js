@@ -14,20 +14,20 @@ $(document).ready(function () {
 
             // Decide what kind of file it is and how to load it
             if (dtypes['FSmesh']['extensions'].indexOf(_fext) >= 0) {
-                if (!viewer_3d.on) {
+                if (!sc.scenes.threeD.on) {
                     viewer_3d_init();
                 }
                 //files2Open.push(parseFSMesh(i, e.target.files));
                 //files2Open.push(parseFSMesh(i, e.target.files,elem,scene,meshFolder));
-                parseFSMesh(i, e.target.files, threeD, scene);
+                parseFSMesh(i, e.target.files);
             } else if (dtypes['electrodes']['extensions'].indexOf(_fext) >= 0) {
-                parseElecJson(i, e.target.files, elecTable); //parse as electrodes json file
+                parseElecJson(i, e.target.files); //parse as electrodes json file
             } else if (dtypes['overlay']['extensions'].indexOf(_fext) >= 0) {
-                parseOverlay(i, e.target.files, elecTable); //parse as electrodes json file
+                parseOverlay(i, e.target.files); //parse as electrodes json file
             } else if (dtypes['volumes']['extensions'].indexOf(_fext) >= 0) {
-                parseVolume(i, e.target.files, threeD, scene);
+                parseVolume(i, e.target.files);
             } else if (dtypes['STL']['extensions'].indexOf(_fext) >= 0) {
-                if (!viewer_3d.on) {
+                if (!sc.scenes.threeD.on) {
                     viewer_3d_init();
                 }
             } else {
@@ -195,7 +195,7 @@ $(document).ready(function () {
     ]
 
     // Create a new tabulator style table
-    elecTable = new Tabulator("#elecTableChild", {
+    let elecTable = new Tabulator("#" + sc.elecTable.domID, {
         //data: tabulatorData,
         placeholder: "Waiting for electrode json file",
         //layout:"fitColumns",
@@ -282,6 +282,7 @@ $(document).ready(function () {
             },
         ],
     });
+    sc.elecTable.obj = elecTable;
 
     //#endregion
 

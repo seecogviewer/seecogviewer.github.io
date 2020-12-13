@@ -82,6 +82,7 @@
                 <div class="w3-dropdown-content w3-bar-block w3-card-4">
                     <a href="#" class="w3-bar-item w3-button" onclick="changeView('defaultView')">3D Main</a>
                     <a href="#" class="w3-bar-item w3-button" onclick="changeView('threeCol')">3D + Static Images</a>
+                    <a href="#" class="w3-bar-item w3-button" onclick="changeView('planarViews')">3D + 2D Planes</a>
                 </div>
             </div>
 
@@ -125,9 +126,13 @@
         <div id="elecStatic" class="w3-container w3-left w3-yellow"></div>
         
         <!--3D View Area-->
-        <div id="threeDviewArea" class="w3-green w3-left">
-            <div id="elecLegend"></div>
-            <div id="sceneGui"></div>
+        <!--<div id="threeDviewArea" class="w3-green w3-left w3-container">-->
+        <div id="scenesArea" class="w3-left w3-container">
+            <!--<div id="threeDviewArea" class="w3-green w3-left w3-container w3-top"></div>-->
+            <canvas id="threeDviewArea" class= "w3-container"></canvas>
+            <div id="elecLegend" class= "w3-container"></div>
+            <div id="sceneGui" class= "w3-container"></div>
+            <div id="planarScenes" class="w3-container w3-bottom"></div>
         </div>
 
         <!--Modal Dialogue box for selecting electrodes-->

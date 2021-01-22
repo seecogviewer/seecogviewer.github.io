@@ -1,104 +1,13 @@
-/*
-To Do
-elecTable
-- Function to start it
-*/
-
-//#region Handling Electrodes
-// elecTable Aesthetics Setter
-/*var aesDefaults = {
-    shape: "sphere",
-    color: "black",
-    size: 2
-};
-var aes = {
-    default: aesDefaults,
-    custom: [
-        {
-            criteria: [{field: "motor", type: "=",value: true}],
-            outcome: {shape: "cube"}
-        },
-        {
-            criteria: [{field: "sensory", type: "=",value: true}],
-            outcome: {shape: "dodecahedron"}
-        },
-        {
-            criteria: [{field: "visual", type: "=",value: true}],
-            outcome: {shape: "tetrahedron"}
-        },
-        {
-            criteria: [{field: "auditory", type: "=",value: true}],
-            outcome: {shape: "cone"}
-        },
-        {
-            criteria: [{field: "language", type: "=",value: true}],
-            outcome: {shape: "octahedron"}
-        },
-        {
-            criteria: [{field: "soz", type: "=",value: true}],
-            outcome: {color: "red", size: 3}
-        },
-        {
-            criteria: [{field: "spikey", type: "=",value: true}],
-            outcome: {color: "green", size: 3}
-        },
-        {
-            criteria: [
-                {field: "soz", type: "=",value: false},
-                {field: "spikey", type: "=",value: false}
-            ],
-            outcome: {color: aesDefaults['color'], size: aesDefaults['size']}
-        },
-        {
-            criteria: [
-                {field: "motor", type: "=",value: false},
-                {field: "sensory", type: "=",value: false},
-                {field: "visual", type: "=",value: false},
-                {field: "auditory", type: "=",value: false},
-                {field: "language", type: "=",value: false}
-            ],
-            outcome: {shape: aesDefaults['shape']}
-        },
-    ]
-};
-
-// Displaying electrodes
-
-// Shapes guide
-var shapeGuide = {
-    cube: (h) => new THREE.BoxBufferGeometry(h, h, h),
-    sphere: (r) => new THREE.SphereBufferGeometry(r, 32, 32),
-    dodecahedron: (r) => new THREE.DodecahedronBufferGeometry(r, 0),
-    tetrahedron: (r) => new THREE.TetrahedronBufferGeometry(r, 0),
-    cone: (r) => new THREE.ConeBufferGeometry(r, r, 10),
-    octahedron: (r) => new THREE.OctahedronBufferGeometry(r,0),
-};
-
-
-var existingElecs = {
-    list: [],
-    getNames: function() {
-        let namesList = [];
-        for (o of this.list) {
-            namesList.push(o.name);
-        }
-        return namesList;
-    },
-    isElec: function(ename) {
-        let currentNames = this.getNames();
-        return currentNames.indexOf(ename) !== -1;
-    },
-    add: function(newElec) {
-        this.list.push(newElec);
-    }
-}*/
-
-//#endregion
-
 var vol = {
     'Coronal': null,
     'Saggital': null,
-    'Axial': null
+    'Axial': null,
+    'foci': {
+        'id': [],
+        'x': [],
+        'y': [],
+        'z': []
+    }
 };
 
 var sc = {
@@ -117,7 +26,7 @@ var sc = {
             color: null,
             on: false
         },
-        axial: {
+        Axial: {
             scene: null,
             camera: null,
             renderer: null,
@@ -127,7 +36,7 @@ var sc = {
             color: null,
             on: false
         },
-        saggital: {
+        Saggital: {
             scene: null,
             camera: null,
             renderer: null,
@@ -137,7 +46,7 @@ var sc = {
             color: null,
             on: false
         },
-        coronal: {
+        Coronal: {
             scene: null,
             camera: null,
             renderer: null,
@@ -171,10 +80,6 @@ var sc = {
         white: '#787878' // Gray
     },
     data: [],
-    viewModes: {
-        current: 'default',
-        options: ['default', 'threeCol'],
-    },
     font: [],
     dtypes: {
         'FSmesh': {
@@ -209,49 +114,58 @@ var sc = {
         }
     },
 };
- var aes, imgHolder;
+ var aes, imgHolder, elecTable, scene;
 
 $(document).ready(function () {
 
-    let init3 = false;
-    let scene;
 
-    //#region Aesthetics
+    let init3 = false;
+    //let scene, elecTable;
+
+    //#region Aesthetics: Displaying Electrodes
     aes = {
         default: {shape: "sphere", color: "black",size: 2}, //aesDefaults,
-        elecTextVisible: true,
+        elecTextVisible: true, // Whether to show elec name hovering over elec in scenes
+        // Custom aesthetic settings
         custom: [
             {
                 criteria: [{field: "motor", type: "=",value: true}],
-                outcome: {shape: "cube"}
+                outcome: {shape: "cube"},
+                display: true
             },
             {
                 criteria: [{field: "sensory", type: "=",value: true}],
-                outcome: {shape: "dodecahedron"}
+                outcome: {shape: "dodecahedron"},
+                display: true
             },
             {
                 criteria: [{field: "visual", type: "=",value: true}],
-                outcome: {shape: "tetrahedron"}
+                outcome: {shape: "tetrahedron"},
+                display: true
             },
             {
                 criteria: [{field: "auditory", type: "=",value: true}],
-                outcome: {shape: "cone"}
+                outcome: {shape: "cone"},
+                display: true
             },
             {
                 criteria: [{field: "language", type: "=",value: true}],
-                outcome: {shape: "octahedron"}
+                outcome: {shape: "octahedron"},
+                display: true
             },
             {
                 criteria: [{field: "soz", type: "=",value: true}],
-                outcome: {color: "red", size: 3}
+                outcome: {color: "red", size: 3},
+                display: true
             },
             {
                 criteria: [{field: "spikey", type: "=",value: true}],
-                outcome: {color: "green", size: 3}
+                outcome: {color: "green", size: 3},
+                display: true
             }
         ],
-        tmpEditor: [],
-        shapeGuide: {
+        tmpEditor: {default: null,custom: null}, // Holder for when updating how elecs look
+        shapeGuide: { // The possible shapes for elecs
             cube: (h) => new THREE.BoxBufferGeometry(h, h, h),
             sphere: (r) => new THREE.SphereBufferGeometry(r, 32, 32),
             dodecahedron: (r) => new THREE.DodecahedronBufferGeometry(r, 0),
@@ -259,60 +173,66 @@ $(document).ready(function () {
             cone: (r) => new THREE.ConeBufferGeometry(r, r, 10),
             octahedron: (r) => new THREE.OctahedronBufferGeometry(r,0),
         },
-        resetAesthetics: function(selected=false) {
+        resetAesthetics: function(selected=false) { // Change row back to default aesthetics
             let rows2Update;
             if (selected === true) {
-                rows2Update = sc.elecTable.obj.getSelectedRows();
+                rows2Update = elecTable.obj.getSelectedRows();
             } else {
-                rows2Update = sc.elecTable.obj.getRows();
+                rows2Update = elecTable.obj.getRows();
             }
             rows2Update.forEach(function(r) {
                 r.update({color: 'default', size: 'default', shape: 'default'});
             });
         },
-        updateRowValues: function(selected=false) {
+        updateRowValues: function(selected=false) { // Update appearance based on new settings
             let customAes = this.custom;
             for (a of customAes) {
-                let foundRows = sc.elecTable.obj.searchRows(a['criteria']);
-                if (foundRows.length !== 0) {
-                    foundRows.forEach(function (r) {
-                        if (selected === true) {
-                            if (r.isSelected()) {r.update(a['outcome']);}
-                        } else {
-                            r.update(a['outcome']);
-                        }
-                    })
+                
+                // Only implement custom setting if opted to actually display it
+                if (a['display'] !== true) {
+                    continue;
+                } else {
+                    let foundRows = elecTable.obj.searchRows(a['criteria']);
+                    if (foundRows.length !== 0) {
+                        foundRows.forEach(function (r) {
+                            if (selected === true) {
+                                if (r.isSelected()) {r.update(a['outcome']);}
+                            } else {
+                                r.update(a['outcome']);
+                            }
+                        })
+                    }
                 }
             }
         },
-        updateScObjs: function(selected=false) {
+        updateScObjs: function(selected=false) { // Update appearance directly on objects
             let rows2Update;
             if (selected === true) {
-                rows2Update = sc.elecTable.obj.getSelectedRows();
+                rows2Update = elecTable.obj.getSelectedRows();
             } else {
-                rows2Update = sc.elecTable.obj.getRows();
+                rows2Update = elecTable.obj.getRows();
             }
             rows2Update.forEach( function(r) {
                 r.getData()['scObj'].update();
-                /*if (r.getData()['scObj'] !== null) {
-                 r.getData()['scObj'].update();
-                }*/
             });
         },
-        updateAesthetics: function(selected=false) {
+        updateAesthetics: function(selected=false) { // Call 3 functions to do full update
             this.resetAesthetics(selected);
             this.updateRowValues(selected);
             this.updateScObjs(selected);
         },
-        tmp2Aesthetics: function() {
-            let newSettings = this.tmpEditor;
+        tmp2Aesthetics: function() { // Update custom aesthetics completely
+            
+            // The new settings
+            let newSettings = this.tmpEditor.custom;
+            let newDefaultSettings = this.tmpEditor.default;
 
             // First start with default
-            let newDefaults = newSettings.getRow('default');
+            let newDefaults = newDefaultSettings.getRows()[0];            
             this.default.shape = newDefaults.getData()['shape'];
             this.default.size = newDefaults.getData()['size'];
             this.default.color = newDefaults.getData()['color'];
-            newDefaults.delete();
+
 
             // Now update all custom settings
             this.custom = [];
@@ -328,17 +248,18 @@ $(document).ready(function () {
                 if (newColor !== "default") {newOutcome['color'] = newColor}
                 if (newSize !== "default") {newOutcome['size'] = newSize}
                 newCustom['outcome'] = newOutcome;
+                newCustom['display'] = r.getData()['display'];
                 aes.custom.push(newCustom);
             });
 
             this.updateAesthetics(false);
         },
-        createEditorDialog: function() {
+        createEditorDialog: function() { // Initiate dialog to change appearances
             // Dialog for changing elec aesthetics
             let dialogRows = [];
             let defaultSettings = {...aes['default']};
-            defaultSettings['field'] = 'default';
-            dialogRows.push(defaultSettings);
+            //defaultSettings['field'] = 'default';
+            //dialogRows.push(defaultSettings);
             const aestheticTraits = ['shape','color','size'];
             let customs = aes['custom'];
             customs.forEach(function(c) {
@@ -350,6 +271,7 @@ $(document).ready(function () {
                     }
                 });
                 currentSettings['field'] = field;
+                currentSettings['display'] = c['display'];
                 dialogRows.push(currentSettings);
             });
     
@@ -357,7 +279,8 @@ $(document).ready(function () {
                 {title: 'Property', field: 'field'},
                 {title: 'Shape', field: 'shape', editor: 'select', editorParams: {values: {"default": "default","cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
                 {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
-                {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3.5, "default": "default"} }}
+                {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3.5, "default": "default"} }},
+                {title: 'Active', field: 'display', formatter: "tickCross", editor: true, hozAlign: 'center', headerSort: false}
             ];
     
             let editorTable = new Tabulator('#editorTable', {
@@ -367,12 +290,25 @@ $(document).ready(function () {
                 columns: dialogColumns,
                 columnMinWidth: 60
             });
-            this.tmpEditor = editorTable;
+            this.tmpEditor['custom'] = editorTable;
+
+            // Create mini default table
+            let editorTableDefault = new Tabulator('#editorTable-default', {
+                data: [defaultSettings],
+                index: 'field',
+                layout:"fitColumns",
+                columns: [
+                    {title: 'Shape', field: 'shape', editor: 'select', editorParams: {values: {"cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
+                    {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                    {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3.5, "default": "default"} }}
+                ],
+                columnMinWidth: 60
+            });
+            this.tmpEditor['default'] = editorTableDefault;
     
-            return editorTable;
         },
         validateEditorDialog: function() {
-            let defaultRow = this.tmpEditor.getRow('default').getData();
+            /*let defaultRow = this.tmpEditor.getRow('default').getData();
             const shapeIsDefault = defaultRow['shape'] === 'default';
             const colorIsDefault = defaultRow['color'] === 'default';
             const sizeIsDefault = defaultRow['size'] === 'default';
@@ -380,12 +316,22 @@ $(document).ready(function () {
                 return false;
             } else {
                 return true;
-            }
+            }*/
+            return true;
+        },
+        initLegend: function() {
+            $("#legend").show();
+            $("#edit-legend-bttn").button();
+            //$("#edit-legend-bttn").click(createEditorDialog);
+            $( "#edit-legend-bttn" ).on( "click", function() {
+                $( "#aesEditorDialog" ).dialog( "open" );
+                aes.createEditorDialog();
+            });
         }
     };
 
-    
-    $("#dialog").dialog({
+    // Set the dialogue box that will have editing aesthetic options
+    $("#aesEditorDialog").dialog({
         resizable: true,
         autoOpen: false,
         width: 700,
@@ -393,7 +339,7 @@ $(document).ready(function () {
         modal: true,
         buttons: {
             "Update": function() {
-                if (!aes.validateEditorDialog) {
+                if (!aes.validateEditorDialog) { //No longer needed
                     $("#ui-id-1").text("Can't set a default value to 'default'")
                 } else {
                     aes.tmp2Aesthetics();
@@ -477,107 +423,575 @@ $(document).ready(function () {
             $("#elecSlideShow").css({"height": newSlideShowHeight});
         }
     });*/
-    //Dialogue to edit properties
+    //#endregion
 
+    //#region elecTable object and associated buttons
 
-    // Dialogue to choose which columns are viewable in the table
-    /*$("#dialog").dialog({
-        autoOpen: false,
-        modal: true,
-        open: function() {
-            if (sc.elecTable.obj !== null) {
-                const tableColumns = sc.elecTable.obj.getColumnDefinitions();
-                tableColumns.forEach(function(tc) {
-                    let bttnName = tc.title + "-input";
-                    let colLabel = document.createElement('LABEL');
-                    colLabel.setAttribute('for',bttnName);
-                    colLabel.innerText = tc.title;
-                    let inptBttn = document.createElement('INPUT');
-                    inptBttn.setAttribute('type','checkbox');
-                    //inptBttn.setAttribute('checked',tc.visible);
-                    inptBttn.checked = tc.visible;
-                    inptBttn.id = bttnName;
-                    $("#" + bttnName).checkboxradio();
-                    $("#dialog-column-list").append(colLabel,inptBttn);
-                });
-                $("#dialog-column-list").controlgroup({"direction": "vertical"});
-                console.log("We're open!");
-            } else {
-                $("#dialog-column-list").text = "Oh No!";
+    // Function for checking if cells can be edited or not on click
+    function check2update(e,cell) {
+        if (document.getElementById("bttns-editmode").checked) {
+            cell.setValue( !cell.getValue() );
+        }
+    }
+
+    // The primary elecTable object
+    elecTable = {
+        obj: null,
+        domID: "elecTableChild",
+        groupBy: ['gridid'],
+        tmpColumnUpdate: null,
+        tmpSelectedEditor: {'aes': null, 'properties': null},
+        selectedUpdatorDialog: function() {
+
+            // Setup Aesthetics editor
+            let aesColumns = [
+                {title: 'Shape', field: 'shape', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change","default": "default","cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
+                {title: 'Color', field: 'color', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", "default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                {title: 'Size', field: 'size', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", "default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3.5, "default": "default"} }},
+            ];
+            let aesRow = [{shape: 'No Change', color: 'No Change', size: 'No Change'}];
+            let aesTable = new Tabulator('#selectedEditorDialog-aes', {
+                data: aesRow,
+                //index: 'field',
+                layout:"fitColumns",
+                columns: aesColumns,
+                columnMinWidth: 60
+            });
+            this.tmpSelectedEditor['aes'] = aesTable;
+
+            // Setup property editor
+            let propColumns = [];
+            let propRow = {};
+            let columnDefs = elecTable.obj.getColumnDefinitions().slice(2);
+            
+            for (c of columnDefs) {
+                if (c.field === 'anat' || c.field === 'gridid') { continue;}                
+                let newProp = {'title': c.title, 'field': c.field, headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", true: true, false: false} }};
+                propColumns.push(newProp);
+                propRow[`${c.field}`] = "No Change";
+            };
+            
+            let propTable = new Tabulator('#selectedEditorDialog-props', {
+                data: [propRow],
+                //index: 'field',
+                layout:"fitColumns",
+                columns: propColumns,
+                columnMinWidth: 60
+            });
+            this.tmpSelectedEditor['properties'] = propTable;
+        },
+        updateSelectedElecs: function(){
+            // blah
+            let todos = [];
+            let selectedRows = elecTable.obj.getSelectedRows();
+
+            // Now update properties
+            let propSettings = this.tmpSelectedEditor['properties'].getData()[0];
+            for (p in propSettings) {
+                if (propSettings[p] == "No Change") {
+                    continue;
+                } else {
+                    for (r of selectedRows) {
+                        const result = propSettings[`${p}`] == "true";
+                        r.update({[`${p}`]: result});
+                    }
+                }
+            }
+            aes.updateRowValues(true);
+            
+            // Now update aesthetics
+            let aesSettings = this.tmpSelectedEditor['aes'].getData()[0];
+            for (a in aesSettings) {
+                if (aesSettings[a] == "No Change") {
+                    continue;
+                } else {
+                    for (r of selectedRows) {
+                        r.update({[`${a}`]: aesSettings[`${a}`]});
+                    }
+                }
+            }
+
+            // Go through all promises
+            /*Promise.all(todos)
+            .then(function() {
+                aes.updateScObjs(true);
+            })
+            .catch(function(error){
+                console.log(error);
+                console.log('Uh Oh. Something went wrong on updating select Eelcs');
+            });*/
+            aes.updateScObjs(true);
+
+        },
+        elecTableColumns: [
+            {
+                formatter: function() {return "<i class=''></i>";},
+                titleFormatter: function() {return "<i class='fa fa-eye'></i>";},
+                width: 50,
+                frozen: true,
+                headerSort:false,
+                headerMenu: [
+                    {
+                        label: 'Show All',
+                        action: function(e,column) {
+                            console.log('Showing all elecs!');
+                        }
+                    },
+                    {
+                        label: 'Show Only Visible',
+                        action: function(e,column) {
+                            console.log('Showing only currently visible elecs!');
+                        }
+                    }
+                ],
+                cellClick: function(e,cell){
+                    const isShown3D = cell.getData().scObj.threeObj !== null;
+                    const isShownImg = cell.getData().scObj.img !== null;
+                    let row = cell.getRow();
+                    if (!isShown3D) {
+                        elecTable.displayElec(row);
+                    } else {
+                        elecTable.removeElec(row);
+                    }
+                }
+            },
+            {
+                title: "elecID",
+                field: "elecid",
+                visible: true,
+                headerFilter: "input",
+                editable: false,
+                frozen: true,
+            },
+            {
+                title: 'gridID',
+                field: 'gridid',
+                visible: false,
+                editable: false
+            },
+            {
+                title: "SOZ",
+                field: "soz",
+                formatter: "tickCross",
+                editable: false,
+                visible: true,
+                editor: true,
+                cellClick: check2update
+            },
+            {
+                title: "SPIKEY",
+                field: "spikey",
+                formatter: "tickCross",
+                editable: false,
+                visible: true,
+                editor: true,
+                cellClick: check2update
+            },
+            {
+                title: "Anat",
+                field: "anat",
+                editable: false,
+                visible: true,
+                headerFilter: "input"
+            },
+            {
+                title: "Motor",
+                field: "motor",
+                formatter: "tickCross",
+                editable: false,
+                visible: true,
+                editor: true,
+                cellClick: check2update
+            },
+            {
+                title: "Sensory",
+                field: "sensory",
+                formatter: "tickCross",
+                editable: false,
+                visible: true,
+                editor: true,
+                cellClick: check2update
+            },
+            {
+                title: "Visual",
+                field: "visual",
+                formatter: "tickCross",
+                visible: true,
+                editable: false,
+                editor: true,
+                cellClick: check2update
+            },
+            {
+                title: "Auditory",
+                field: "auditory",
+                formatter: "tickCross",
+                visible: true,
+                editable: false,
+                editor: true,
+                cellClick: check2update
+            },
+            {
+                title: "Language",
+                field: "language",
+                formatter: "tickCross",
+                visible: true,
+                editable: false,
+                editor: true,
+                cellClick: check2update
+            }
+        ],
+        rowMenu: [{
+                label: "<i class='fa fa-edit'></i> Edit Selected",
+                action: function (e, row) {
+                    //row.getTable().selectRow();
+                    //console.log('Editing!');
+                    $( "#selectedEditorDialog" ).dialog( "open" );
+                    elecTable.selectedUpdatorDialog();
+                }
+            },
+            {
+                label: "<i class='fa fa-edit'></i> Display Selected",
+                action: function (e, row) {
+                    //row.getTable().selectRow();
+                    e.preventDefault();
+                    let selectedRows = row.getTable().getSelectedRows();
+                    selectedRows.forEach(function (rowX) {
+                        elecTable.displayElec(rowX);
+                    })
+                }
+            }
+        ],
+        createElecTable: function(inputData) {
+            let t = new Tabulator('#elecTable', {
+                placeholder: "Waiting for electrode json file",
+                data: inputData,
+                layout: "fitData",
+                index: "elecid",
+                //height: "100%",
+                resizableColumns: true,
+                movableColumns: true,
+                groupHeader: function(value,count,data,group) {
+                    return value + "<span class='row-hdr-span' style='color:#000; margin-left:10px; margin-right:10px; font-weight: 100; font-size: 12px;'>- " + count + " Electrodes</span>";
+                },
+                groupContextMenu: [
+                    {
+                        label: "Select All",
+                        action: function(e,group) {
+                            group.getRows().forEach(function(r) {r.select();})
+                        }
+                    },
+                    {
+                        label: "Show All",
+                        action: function(e,group) {
+                            group.show();
+                            group.getRows().forEach(function(r) {
+                                if (r.getData().scObj.threeObj === null) {
+                                    elecTable.displayElec(r);
+                                }
+                            })
+                        }
+                    },
+                    {
+                        label: "Remove All",
+                        action: function(e,group) {
+                            group.show();
+                            group.getRows().forEach(function(r) {
+                                if (r.getData().scObj.threeObj !== null) {
+                                    elecTable.removeElec(r);
+                                }
+                            })
+                            group.hide();
+                        }
+                    }
+                ],
+                selectablePersistence: false,
+                columnMinWidth: 10,
+                rowContextMenu: this.rowMenu,
+                selectable: true,
+                groupDblClick: function (e, group) {
+                    group.getRows().forEach(function (row) {
+                        row.toggleSelect();
+                    })
+                },
+                groupBy: this.groupBy,
+                groupStartOpen: [false],
+                columns: this.elecTableColumns
+            });
+            t = this.setupAesthetics(t);
+            this.obj = t;
+            return t;
+        },
+        setupElecRow: function (elecData, filetype) { // Setup needed data for table
+            // If it's an older version of elec json then use lepto field for coordinates
+            if (!elecData.hasOwnProperty('coords') && elecData.hasOwnProperty('lepto')) {
+                elecData['coords'] = elecData['lepto'];
+            }
+
+            // Add clinical fields
+            const neededFields = ['motor', 'sensory', 'visual', 'auditory', 'language', 'soz', 'spikey'];
+            for (field of neededFields) {
+                if (!elecData.hasOwnProperty(field)) {
+                    elecData[field] = false;
+                }
+            }
+
+            // Add the anat field if it's not there
+            if (!elecData.hasOwnProperty('anat')) {
+                elecData['anat'] = 'Unknown';
+            }
+
+            // Add aesthetic fields
+            const aesFields = ['shape', 'color', 'size'];
+            for (field of aesFields) {
+                if (!elecData.hasOwnProperty(field)) {
+                    elecData[field] = "default";
+                }
+            }
+
+            // Holder for electrode object that will be added to 3D scene
+            elecData['scObj'] = null;
+
+            return elecData;
+        },
+        setupAesthetics: function (t) { // Create aesthetic params
+            // First do Tabulator search of table with criteria in custom AES
+            aes['custom'].forEach(function (aesCustom) {
+                let searchCrit = aesCustom['criteria'];
+                let updateParams = aesCustom['outcome'];
+                let critRows = t.searchRows(searchCrit);
+                if (critRows.length !== 0) {
+                    critRows.forEach(function (r) {
+                        r.update(updateParams);
+                    });
+                }
+            });
+
+            // Initiate the electrode object
+            t.getRows().forEach(function (elecData) {
+                elecData.getData()['scObj'] = new Electrode(elecData);
+            })
+
+            return t;
+        },
+        displayElec: function(elecData,threed=true,staticImg=true) {
+            let scObj = elecData.getData()['scObj'];
+            let rowID = elecData.getData()['elecid'];
+            let eyeCell = elecData.getCells()[0];
+            scObj.init(threed,staticImg);
+            if (threed) {
+                if (sc.scenes.threeD.scene.getObjectByName(rowID) === undefined) {
+                    sc.scenes.threeD.scene.add(scObj.threeObj);
+                    $(eyeCell.getElement()).children('i').addClass('fa fa-eye');
+                } else {
+                    scObj.update();
+                }
+            }
+            if (staticImg && scObj.img !== null) {
+                imgHolder.appendImg(elecData.getData()['PICS']);
             }
         },
-        //elecTable.getColumnDefinitions()[0].visible
-        buttons: {
-            "Accept": function() {
-                console.log("accepted");
-                $("#dialog-column-list > *").remove();
-                $( this ).dialog( "close" );
-            },
-            Cancel: function() {
-                $("#dialog-column-list > *").remove();
-                $( this ).dialog( "close" );
+        removeElec: function(elecData) {
+            let scObj = elecData.getData()['scObj'];
+            let rowID = elecData.getData()['elecid'];
+            const threeDVisible = document.getElementById("scenesArea").style.display !== "none";
+            let eyeCell = elecData.getCells()[0];
+            // If object is visible in 3D scene, remove it
+            if (threeDVisible && scObj.threeObj !== null) {
+                scObj.destroyObj();
+                $(eyeCell.getElement()).children('i').removeClass('fa fa-eye');
             }
+    
+            // If object is visible in static image scene, delete it
+            if (scObj.img !== null) {
+                scObj.destroyImg();
+            }
+        },
+        createColumnUpdateDialog: function() { // Create dialogue to update column definition
+
+            // Set the columns for this table
+            let dialogColumns = [
+                {rowHandle:true, formatter:"handle", headerSort:false, frozen:true, width:30, minWidth:30},
+                {title: 'Column', field: 'column'},
+                {title: 'Visible', field: 'isVisible', formatter: "tickCross", editor: true, hozAlign: 'center'},
+                {title: 'GroupBy', field: 'groupBy', formatter: "tickCross", editor: true, hozAlign: 'center'},
+                {title: 'Filter', field: 'filter', editor:"select", editorParams:{values:{"None":"None", "Yes":"Yes", "No":"No"}} },
+            ];
+
+            // Get column definitions. Use as rows
+            let dialogRows = [];
+            let columnDefs = elecTable.obj.getColumnDefinitions().slice(2);
+            columnDefs.forEach(function(c) {
+                const isGrouped = c['field'].indexOf(elecTable.groupBy) !== -1 ? true: false;
+                let newRow = {'column': c.title, 'fieldname': c.field, 'isVisible': c.visible, 'groupBy': isGrouped, 'filter': ""};
+                dialogRows.push(newRow);
+            });
+
+            // Create the table
+            let columnTable = new Tabulator('#columnEditor', {
+                data: dialogRows,
+                index: 'column',
+                movableRows:true,
+                layout: 'fitColumns',
+                columns: dialogColumns,
+                columnMinWidth: 60
+            });
+
+            this.tmpColumnUpdate = columnTable;
+        },
+        updateColumnSettings: function() {
+            let newColSettings = this.tmpColumnUpdate.getRows();
+            let tableGroups = [];
+            let todos = [];
+
+            // Loop through each column setting
+            newColSettings.forEach(function(colSettings) {
+
+                let c = colSettings.getData();
+
+                // Check if column should be grouped in rows
+                if (c.groupBy) {
+                    tableGroups.push(c.fieldname);
+                }
+
+                // Change visibility
+                //let newTodo = elecTable.obj.updateColumnDefinition(c.fieldname, {visible: c.isVisible});
+                //todos.push(newTodo);
+                if (c.isVisible) {
+                    elecTable.obj.showColumn(c.fieldname);
+                } else {
+                    elecTable.obj.hideColumn(c.fieldname);
+                }
+            })
+
+            // Redefine how rows are grouped
+            this.groupBy = tableGroups;
+            this.obj.setGroupBy(tableGroups);
+            /*let groupByPromise = this.obj.setGroupBy(tableGroups);
+            todos.push(groupByPromise);
+
+            // Initiate all the promises
+            Promise.all(todos).catch(function(error) {
+                window.console.log('Whoops! Something went wrong in updateColumnSettings');
+                window.console.log(error);
+            })*/
+
+        },
+        table2csv: function() {
+            // Grab table data
+            let fields2get = []; // Which fields to download
+            let rowdata = [];
+            fields2get.push(this.obj.getColumns()[1].getField());
+            this.obj.getColumns().slice(3).forEach(function(c) {
+                fields2get.push(c.getField());
+            });
+
+            let colNames = fields2get.concat(["x", "y", "z"]);
+            rowdata.push(colNames.join(',') + ",\n");
+
+            // Go through each row to get data
+            this.obj.getRows().forEach(function(r) {
+                let thisRow = [];
+                for (f of fields2get) {
+                    thisRow.push(r.getData()[f]);
+                }
+                // Now grab coordinates
+                for (cii of [0,1,2]) {
+                    thisRow.push(r.getData()['coords'][cii]);
+                }
+                
+                thisRowStr = thisRow.join(',') + ",\n";
+                rowdata.push([thisRowStr]);
+            });
+            return rowdata;
+        },
+        downloadTable: function(data) {
+            let file = new File(data, "seecog_table.csv", {type: "data:text/csv;charset=utf-8"});
+            saveAs(file);
+        }
+    }
+
+    // Assign download function to a button
+    $("#download-bttn").click(function() {
+        if (elecTable.obj !== null) {
+            let data = elecTable.table2csv();
+            elecTable.downloadTable(data);
+        } else {
+            alert("Sorry! Can't download something that doesn't exist!")
         }
     });
-    $("#elecTable-columns-toggle").on( "click", function() {
-        $( "#dialog" ).dialog( "open" );
-    });*/
+
+    // Make the buttons above the table into a controlgroup
+    $("#elecTable-buttons").controlgroup();
+
+    // Button to select all rows
+    $("#bttns-selectall").click(function () {
+        if (elecTable.obj != null) {
+            elecTable.obj.selectRow(elecTable.obj.rowManager.activeRows);
+        }
+    });
+
+    // Button to update elecTable after changes
+    $("#bttns-update").click(function () {
+        if (elecTable.obj != null) {
+            aes.updateAesthetics(false);
+        }
+    });
+
+    // Set the button for updating column definitions
+    $("#elecTable-columns-toggle").button();
+    $( "#elecTable-columns-toggle" ).on( "click", function() {
+        $( "#columnEditoDialog" ).dialog( "open" );
+        elecTable.createColumnUpdateDialog();
+    });
+
+    // Update column definitions
+    $("#columnEditoDialog").dialog({
+        resizable: true,
+        autoOpen: false,
+        width: 700,
+        height: 500,
+        modal: true,
+        buttons: {
+            "Update": function() {
+                elecTable.updateColumnSettings();
+                $( this ).dialog( "close" );
+                console.log('WOOHOO! It worked!');
+            },
+            Cancel: function() {
+                $( this ).dialog( "close" );
+            }
+        },
+        close: function() {
+            console.log('Closed!');
+        }
+    });
+
+    // Update individual elecs
+    $("#selectedEditorDialog").dialog({
+        resizable: true,
+        autoOpen: false,
+        width: 700,
+        height: 500,
+        modal: true,
+        buttons: {
+            "Update": function() {
+                elecTable.updateSelectedElecs();
+                //elecTable.updateColumnSettings();
+                $( this ).dialog( "close" );
+                console.log('WOOHOO! It worked!');
+            },
+            Cancel: function() {
+                $( this ).dialog( "close" );
+            }
+        },
+        close: function() {
+            console.log('Closed!');
+        }
+    });
+
     //#endregion
 
     //#region Handling electrode objects
-    // Add the needed fields to parsed data
-    function setupElecRow(elecData) {
-
-        // If it's an older version of elec json then use lepto field for coordinates
-        if (!elecData.hasOwnProperty('coords') && elecData.hasOwnProperty('lepto')) {
-            elecData['coords'] = elecData['lepto'];
-        }
-
-        // Add clinical fields
-        const neededFields = ['motor', 'sensory', 'visual', 'auditory', 'language', 'soz', 'spikey'];
-        for (field of neededFields) {
-            if (!elecData.hasOwnProperty(field)) {
-                elecData[field] = false;
-            }
-        }
-
-        // Add aesthetic fields
-        const aesFields = ['shape', 'color', 'size'];
-        for (field of aesFields) {
-            if (!elecData.hasOwnProperty(field)) {
-                elecData[field] = "default";
-            }
-        }
-
-        // Holder for electrode object that will be added to 3D scene
-        elecData['scObj'] = null;
-        
-        return elecData;
-    }
-
-    // Setup aesthetics once table has been created
-    function setupAesthetics(elecTable) {
-
-        // First do Tabulator search of table with criteria in custom AES
-        aes['custom'].forEach(function (aesCustom) {
-            let searchCrit = aesCustom['criteria'];
-            let updateParams = aesCustom['outcome'];
-            let critRows = elecTable.searchRows(searchCrit);
-            if (critRows.length !== 0) {
-                critRows.forEach(function (r) {
-                    r.update(updateParams);
-                });
-            }
-        });
-
-        // Initiate the electrode object
-        elecTable.getRows().forEach(function(elecData) {
-            elecData.getData()['scObj'] = new Electrode(elecData);
-        })
-
-        return elecTable;
-    }
-
     // Object for DOMs that can hold static images
     imgHolder = {
         domElement1: document.getElementById('elecSlideShow'),
@@ -732,43 +1146,6 @@ $(document).ready(function () {
     $('#slideshow-bttn-r').click( function() {
         imgHolder.nextSlide(1);
     });
-
-    // Function for displaying electrode data
-    function displayElec(elecData,threed=true,staticImg=true) {
-        let scObj = elecData.getData()['scObj'];
-        let rowID = elecData.getData()['elecid'];
-        let eyeCell = elecData.getCells()[0];
-        scObj.init(threed,staticImg);
-        if (threed) {
-            if (sc.scenes.threeD.scene.getObjectByName(rowID) === undefined) {
-                sc.scenes.threeD.scene.add(scObj.threeObj);
-                $(eyeCell.getElement()).children('i').addClass('fa fa-eye');
-            } else {
-                scObj.update();
-            }
-        }
-        if (staticImg && scObj.img !== null) {
-            imgHolder.appendImg(elecData.getData()['PICS']);
-        }
-    }
-
-    // Function for removing electrode from scene
-    function removeElec(elecData) {
-        let scObj = elecData.getData()['scObj'];
-        let rowID = elecData.getData()['elecid'];
-        const threeDVisible = document.getElementById("scenesArea").style.display !== "none";
-        let eyeCell = elecData.getCells()[0];
-        // If object is visible in 3D scene, remove it
-        if (threeDVisible && scObj.threeObj !== null) {
-            scObj.destroyObj();
-            $(eyeCell.getElement()).children('i').removeClass('fa fa-eye');
-        }
-
-        // If object is visible in static image scene, delete it
-        if (scObj.img !== null) {
-            scObj.destroyImg();
-        }
-    }
 
     // Electrode Object without being an extension of THREE.Group Class
     function Electrode(elecData) {
@@ -930,195 +1307,6 @@ $(document).ready(function () {
 
     //#endregion
 
-    //#region elecTable Things
-    // Create the elecTable right-click rows
-    const rowMenu = [{
-            label: "<i class='fa fa-edit'></i> Edit Selected",
-            action: function (e, row) {
-                //row.getTable().selectRow();
-                console.log('Editing!');
-            }
-        },
-        {
-            label: "<i class='fa fa-edit'></i> Display Selected",
-            action: function (e, row) {
-                //row.getTable().selectRow();
-                e.preventDefault();
-                let selectedRows = row.getTable().getSelectedRows();
-                selectedRows.forEach(function(rowX) {
-                    displayElec(rowX);
-                })
-            }
-        }
-    ];
-
-    // Columns for the elecTable
-    let elecTableColumns = [
-        {
-            formatter: function() {return "<i class=''></i>";},
-            titleFormatter: function() {return "<i class='fa fa-eye'></i>";},
-            width: 30,
-            frozen: true,
-            headerSort:false,
-            download:false,
-            cellClick: function(e,cell){
-                const isShown3D = cell.getData().scObj.threeObj !== null;
-                const isShownImg = cell.getData().scObj.img !== null;
-                let row = cell.getRow();
-                if (!isShown) {
-                    displayElec(row);
-                } else {
-                    removeElec(row);
-                }
-            }
-        },
-        {
-            title: "elecID",
-            field: "elecid",
-            visible: true,
-            headerFilter: "input",
-            editable: false,
-            frozen: true,
-            /*accessorDownload: function(value, data, type, params, column){
-                debugger;
-                console.log(value);
-            },
-            accessorDownloadParams:{checked: true}*/
-        },
-        {
-            title: "SOZ",
-            field: "soz",
-            formatter: "tickCross",
-            editable: false,
-            visible: true,
-            editor: true
-        },
-        {
-            title: "SPIKEY",
-            field: "spikey",
-            formatter: "tickCross",
-            editable: false,
-            visible: true,
-            editor: true,
-        },
-        {
-            title: "Anat",
-            field: "anat",
-            editable: false,
-            visible: true,
-            headerFilter: "input"
-        },
-        {
-            title: "Motor",
-            field: "motor",
-            formatter: "tickCross",
-            editable: false,
-            visible: true,
-            editor: true
-        },
-        {
-            title: "Sensory",
-            field: "sensory",
-            formatter: "tickCross",
-            editable: false,
-            editor: true
-        },
-        {
-            title: "Visual",
-            field: "visual",
-            formatter: "tickCross",
-            visible: true,
-            editable: false,
-            editor: true
-        },
-        {
-            title: "Auditory",
-            field: "auditory",
-            formatter: "tickCross",
-            visible: true,
-            editable: false,
-            editor: true
-        },
-        {
-            title: "Language",
-            field: "language",
-            formatter: "tickCross",
-            visible: true,
-            editable: false,
-            editor: true
-        }
-    ];
-
-    // Function to create elecTable
-    function createElecTable(inputData) {
-        let elecTable = new Tabulator('#elecTable', {
-            placeholder: "Waiting for electrode json file",
-            data: inputData,
-            layout: "fitData",
-            index: "elecid",
-            //height: "100%",
-            downloadReady:function(fileContents, blob){debugger;},
-            resizableColumns: true,
-            downloadConfig: {
-                rowGroups: false,
-                columnGroups: false,
-                dataTree:false
-            },
-            downloadRowRange:"all",
-            selectablePersistence: false,
-            columnMinWidth: 10,
-            rowContextMenu: rowMenu,
-            selectable: true,
-            groupDblClick: function (e, group) {
-                group.getRows().forEach(function (row) {
-                    row.toggleSelect();
-                })
-            },
-            groupBy: ["gridid"],
-            groupStartOpen: [false],
-            columns: elecTableColumns
-        });
-        elecTable = setupAesthetics(elecTable);
-        sc.elecTable.obj = elecTable;
-        return elecTable;
-    }
-
-    // Make the buttons above the table into a controlgroup
-    $("#elecTable-buttons").controlgroup();
-
-    // Button to select all rows
-    $("#bttns-selectall").click(function () {
-        if (sc.elecTable.obj != null) {
-            sc.elecTable.obj.selectRow(sc.elecTable.obj.getData('active'));
-        }
-    });
-
-    // Update electrodes when update button pressed
-    function updateElecRows() {
-        let customAes = aes['custom'];
-        for (a of customAes) {
-            let foundRows = sc.elecTable.obj.searchRows(a['criteria']);
-            if (foundRows.length !== 0) {
-                foundRows.forEach(function (r) {
-                    r.update(a['outcome']);
-                    if (r.getData()['scObj'] !== null) {
-                        r.getData()['scObj'].update();
-                    }
-                })
-            }
-        }
-    }
-
-    // Button to update elecTable after changes
-    $("#bttns-update").click(function () {
-        if (sc.elecTable.obj != null) {
-            //updateElecRows();
-            aes.updateAesthetics(false);
-        }
-    });
-
-    //#endregion
-
     //#region Parsing functions
 
     // Parse electrodes json file
@@ -1141,23 +1329,89 @@ $(document).ready(function () {
                 // Check if some necessary properties are there 
                 // If the electrode doesn't have a default color, then 
                 parsedText.forEach(function (elecObj) {
-                    setupElecRow(elecObj);
+                    elecTable.setupElecRow(elecObj);
                 })
                 return parsedText;
             })
             .then(function (elecData) {
-                //debugger;
-                elecTable = createElecTable(elecData);
-                // Checkbox to enable editing of elecTable
-                editableColumns = ['soz', 'spikey', 'motor', 'sensory', 'visual', 'auditory', 'language'];
-                let editColButton = document.getElementById("bttns-editmode");
-                editColButton.addEventListener('click', function (event) {
-                    editableColumns.forEach(function (col) {
-                        elecTable.updateColumnDefinition(col, {
-                            editable: editColButton.checked
-                        })
-                    })
+                elecTable.createElecTable(elecData);
+            })
+            .catch(function (error) {
+                window.console.log('oops... something went wrong...');
+                window.console.log(error);
+            })
+        );
+    }
+
+    // Parse electrodes csv file
+    function parseElecCsv(idx, files, table) {
+        return (
+            Promise.resolve()
+            .then(function () {
+                return new Promise(function (resolve, reject) {
+                    let myReader = new FileReader();
+                    // should handle errors too...
+                    myReader.addEventListener('load', function (e) {
+                        resolve(e.target.result);
+                    });
+                    myReader.readAsText(files[idx]);
                 });
+            })
+            .then(function (rawText) {
+                
+                // Convert the csv file to a json formatted style
+                const parsedData = rawText.split("\n");
+                let colNames = parsedData[0].split(",");
+
+                // Remove any blank columns
+                let rmvCols = true;
+                while (rmvCols) {
+                    if (colNames[colNames.length-1] === "") {
+                        colNames.pop();
+                    } else {
+                        rmvCols = false;
+                    }
+                }
+
+                // Remove any trailing whitespaces from column names and set to lowercase
+                for (c=0; c<colNames.length; c++) {
+                    colNames[c] = colNames[c].toLocaleLowerCase().trim();
+                }
+
+                let numCols = colNames.length;
+                let tableData = [];
+
+                // Go through each row
+                const tLength = parsedData.length;
+                for (ii=1;ii<tLength;ii++) {
+                    if (parsedData[ii].length == 0) {continue;}
+                    let rowData = {};
+                    let rawRow = parsedData[ii].split(",");
+
+                    // Add a new field for each column
+                    for (cii=0;cii<numCols;cii++) {
+                        rowData[colNames[cii]] = rawRow[cii];
+                    }
+
+                    // Add gridid
+                    let elecid = rowData['elecid'];
+                    rowData['gridid'] = elecid.replace(/\d+/,"");
+
+                    // Add coords
+                    rowData["coords"] = [].concat(
+                        parseFloat(rowData['x']),
+                        parseFloat(rowData['y']),
+                        parseFloat(rowData['z'])
+                        );
+
+                    tableData.push(elecTable.setupElecRow(rowData));
+
+                }
+
+                return tableData;
+            })
+            .then(function (elecData) {
+                elecTable.createElecTable(elecData);
             })
             .catch(function (error) {
                 window.console.log('oops... something went wrong...');
@@ -1268,6 +1522,86 @@ $(document).ready(function () {
         return planeFolder;
     }
 
+    // Create the 2D scene for the slice
+    function createPlaneScene(planesc,ax,domID) {
+        let div2d = document.getElementById(domID);
+        let renderer2d = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        renderer2d.setSize(div2d.offsetWidth, div2d.offsetHeight);
+        renderer2d.setClearColor(0x000000, 1);
+        renderer2d.setPixelRatio(window.devicePixelRatio);
+        div2d.appendChild(renderer2d.domElement);
+
+        // Create position for line of camerapole
+        let lineEnd;
+        const camDist = 200;
+        switch (ax) {
+            case 'Saggital':
+                lineEnd = new THREE.Vector3( camDist, 0, 0 );
+                break;
+            case 'Coronal':
+                lineEnd = new THREE.Vector3( 0, camDist, 0 );
+                break;
+            case 'Axial':
+                lineEnd = new THREE.Vector3( 0, 0, camDist );
+                break;
+        }
+
+        // Pole to mount camera
+        let material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+        let points = [];
+        points.push(lineEnd);
+        points.push( new THREE.Vector3( 0, 0, 0 ) );
+        let geometry = new THREE.BufferGeometry().setFromPoints( points );
+        line = new THREE.Line( geometry, material );
+        line.visible = false; // Helpful in debugging cameras
+
+        // The camera
+        let camera = new AMI.OrthographicCamera(
+            renderer2d.domElement.clientWidth / -2,
+            renderer2d.domElement.clientWidth / 2,
+            renderer2d.domElement.clientHeight / 2,
+            renderer2d.domElement.clientHeight / -2,
+            1,
+            1000
+            );
+        camera.position.copy(points[0]);
+        //camera.invertRows();
+        line.add(camera);
+        camera.position.copy(points[0]);
+        camera.lookAt(0,0,0);
+        planesc.add(line);
+
+        switch (ax) {
+            case 'Saggital':
+                camera.rotateZ(Math.PI/2);
+                break;
+            case 'Coronal':
+                camera.rotateZ(Math.PI);
+                break;
+            case 'Axial':
+                lineEnd = new THREE.Vector3( 0, 0, camDist );
+                break;
+        }
+
+        // Add to global object
+        sc.scenes[ax].camera = camera;
+        sc.scenes[ax].renderer = renderer2d;
+        sc.scenes[ax].scene = planesc;
+
+        // Render function
+        function div2dAnimate () {
+            //controls.update();
+            renderer2d.render(planesc, camera);
+        
+            requestAnimationFrame(function () {
+                div2dAnimate();
+            });
+        }
+        div2dAnimate();
+    }
+
     // Parse Volumes
     function parseVolume(idx, files) {
         var volLoader = new AMI.VolumeLoader();
@@ -1318,21 +1652,24 @@ $(document).ready(function () {
                         'obj': new AMI.StackHelper(stackT1),
                         'color': 0xff0000,
                         'axes': ['x', 'z'],
-                        'pos': 'y'
+                        'pos': 'y',
+                        'dom': "plane-coronal"
                     },
                     'Saggital': {
                         'ori': 1,
                         'obj': new AMI.StackHelper(stackT1),
                         'color': 0x00ff00,
                         'axes': ['y', 'z'],
-                        'pos': 'x'
+                        'pos': 'x',
+                        'dom': "plane-saggital"
                     },
                     'Axial': {
                         'ori': 2,
                         'obj': new AMI.StackHelper(stackT1),
                         'color': 0x0000ff,
                         'axes': ['x', 'y'],
-                        'pos': 'z'
+                        'pos': 'z',
+                        'dom': "plane-axial"
                     }
                 };
                 for (plane in orients) {
@@ -1346,6 +1683,11 @@ $(document).ready(function () {
                     scenePlaneController(newScene,plane,orients[plane]['axes'],orients[plane]['pos']);
                     sc.scenes.threeD.scene.add(newScene);
 
+                    // Create 2D plane scene
+                    //if (plane === 'Axial') {
+                        createPlaneScene(newScene,plane,orients[plane]['dom']);
+                    //}
+                    
                     //planeController(orients[plane]['obj'], plane, orients[plane]['axes']);
                     //sc.scenes.threeD.scene.add(orients[plane]['obj']);
                 }
@@ -1426,13 +1768,7 @@ $(document).ready(function () {
         const threeD = document.getElementById("threeDviewArea");
 
         // Display the legend
-        $("#legend").show();
-        $("#edit-legend-bttn").button();
-        //$("#edit-legend-bttn").click(createEditorDialog);
-        $( "#edit-legend-bttn" ).on( "click", function() {
-            $( "#dialog" ).dialog( "open" );
-            aes.createEditorDialog();
-        });
+        aes.initLegend();
 
         //#region Classic ThreeJS setup
         // ThreeJS renderer
@@ -1533,6 +1869,8 @@ $(document).ready(function () {
                 parseFSMesh(i, e.target.files);
             } else if (sc.dtypes['electrodes']['extensions'].indexOf(_fext) >= 0) {
                 parseElecJson(i, e.target.files); //parse as electrodes json file
+            }else if (_fext === "csv") {
+                parseElecCsv(i, e.target.files); //parse as electrodes csv file
             } else if (sc.dtypes['volumes']['extensions'].indexOf(_fext) >= 0) {
                 if (!init3) {
                     init3DScene();
@@ -1546,10 +1884,8 @@ $(document).ready(function () {
     })
     //#endregion
 
-    //#region How to initiate scene
-    $("#chng-view1").trigger("click"); // Start in view1
-    //createElecTable();
+    //#region How to initiate the whole program
+    $("#chng-view3").trigger("click"); // Start in view1
     //#endregion
-
 
 });

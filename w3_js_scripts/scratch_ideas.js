@@ -115,7 +115,7 @@ row = {color: 'default', size: 3, shape: 'default'};
 // For creating 2D interactive scenes
 // Making scenes for 2D planar slices
 var div2d = document.getElementById("plane-coronal");
-var obj = sc.scenes.threeD.scene.children[3];
+var obj = vol['Coronal'].parent;
 var renderer2d = new THREE.WebGLRenderer({
     antialias: true
 });
@@ -124,6 +124,14 @@ renderer2d.setClearColor(0xffffff, 1);
 renderer2d.setPixelRatio(window.devicePixelRatio);
 div2d.appendChild(renderer2d.domElement);
 
+cameraPole = new THREE.Group();
+material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+points = [];
+points.push( new THREE.Vector3(0, 200, 0 ) );
+points.push( new THREE.Vector3( 0, 0, 0 ) );
+geometry = new THREE.BufferGeometry().setFromPoints( points );
+line = new THREE.Line( geometry, material );
+//cameraPole.add(line);
 // camera
 var camera = new AMI.OrthographicCamera(
 renderer2d.domElement.clientWidth / -2,
@@ -133,16 +141,31 @@ renderer2d.domElement.clientHeight / -2,
 1,
 1000
 );
+/*let camera = new THREE.PerspectiveCamera(45, renderer2d.domElement.clientWidth / renderer2d.domElement.clientHeight, 1, 1000);
+camera.position.x = 0;
+camera.position.y = 0;
+camera.position.z = 20*10;*/
+
+sg = new THREE.SphereBufferGeometry(3, 32, 32);
+sm = new THREE.MeshBasicMaterial({color: 'red'});
+s = new THREE.Mesh(sg,sm);
+line.add(s);
+//obj.add(cameraPole);
+
+s.add(camera);
+s.position.set(0,200,0);
+camera.lookAt(0,0,0);
+obj.add(line)
 
 // controls
-var controls = new AMI.TrackballOrthoControl(camera, renderer2d.domElement);
+/*var controls = new AMI.TrackballOrthoControl(camera, renderer2d.domElement);
 controls.staticMoving = true;
 controls.noRotate = true;
-camera.controls = controls;
+camera.controls = controls;*/
 
 
 function div2dAnimate () {
-    controls.update();
+    //controls.update();
     renderer2d.render(obj, camera);
 
     requestAnimationFrame(function () {
@@ -150,6 +173,10 @@ function div2dAnimate () {
     });
 }
 div2dAnimate();
+
+
+
+
 //#endregion
 
 //#region Playing with Aesthetics

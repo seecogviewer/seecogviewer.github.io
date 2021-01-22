@@ -18,7 +18,8 @@
     <link rel="stylesheet" href="external/jquery-ui-1.12.1.custom/jquery-ui.min.css">
 
     <!--Font-Awesome-->
-    <link rel="stylesheet" href="external/font-awesome-4.7.0/css/font-awesome.min.css">
+    <script src="https://kit.fontawesome.com/5828851b96.js" crossorigin="anonymous"></script>
+    <!--<link rel="stylesheet" href="external/font-awesome-4.7.0/css/font-awesome.min.css">-->
 
     <!--Tabulator-->
     <link href="external/tabulator.min.css" rel="stylesheet">
@@ -42,6 +43,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ami.js/0.33.0/ami.js" integrity="sha512-kLrPMhGGqqiZusj/hBuKiqaKmuu0ji0fjr9C3rDpLnxnN/ytUlBftGlicotGT2laImlZuavNUFuQ/jdVWKWNjQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" src="external/loaders.freesurfer.js"></script>
 
+    <!--Filesaver.js-->
+    <script type="text/javascript" src="external/filesaver/FileSaver.js"></script>
+
     <!--Custom Javascript
     <script src="w3_js_scripts/variable_initiate.js"></script>
     <script src="w3_js_scripts/threejs_functions.js"></script>
@@ -55,6 +59,7 @@
 
     <!--Custom css-->
     <!--<link rel="stylesheet" href="style.css">-->
+
 
     <style>
         html,
@@ -192,7 +197,7 @@
             height: 100%;
         }
 
-        #dialog {
+        .scDialog {
             display: none;
             z-index: 10;
         }
@@ -216,6 +221,9 @@
                     <a id="load-bttn-parent" href="#load" class="w3-bar-item w3-button" onclick="document.getElementById('load-bttn').click()">
                         Load
                         <input id="load-bttn" type="file" style="display: none;" multiple>
+                    </a>
+                    <a id="download-bttn" href="#download" class="w3-bar-item w3-button">
+                        Download
                     </a>
                     <!--<a href="#" class="w3-bar-item w3-button">Close All</a>-->
                 </div>
@@ -243,7 +251,6 @@
                 </div>
             </div>
             
-            <a id="clearElecsBttn" href="#" class="w3-bar-item w3-button w3-right w3-disabled">Clear Electrodes</a>
             <a id="selectElecs" href="#" class="w3-bar-item w3-button w3-right w3-disabled">Select Electrodes</a>
         
         </div>
@@ -272,7 +279,7 @@
                     
                     <label class="w3-bar-item w3-button w3-small elecTable-buttons-item" for="bttns-editmode">EditMode</label>
                     <input class="" type="checkbox" id="bttns-editmode">
-                    <button id="bttns-update" class="w3-button w3-bar-item w3-small elecTable-buttons-item">Update Table</button>
+                    <button id="bttns-update" class="w3-button w3-bar-item w3-small elecTable-buttons-item">Update Scene</button>
                     <button class="w3-button w3-bar-item w3-small elecTable-buttons-item">Search</button>
                 </div>
                 <div id="elecTable" class="w3-row w3-lime"></div>
@@ -304,8 +311,27 @@
     
     </div>
 
-    <div id="dialog" title="Select Display Settings">
+    <!--Electrode Aesthetics Editor Dialogue-->
+    <div id="aesEditorDialog" class='scDialog' title="Select Display Settings">
+        <h2 class="w3-center">Default Settings</h2>
+        <div id='editorTable-default'></div>
+        <br>
+        <h2 class="w3-center">Custom Settings</h2>
         <div id="editorTable"></div>
+    </div>
+
+    <!--Column Editor Dialogue-->
+    <div id="columnEditoDialog" class='scDialog' title="Show/Hide and Edit columns">
+        <div id="columnEditor"></div>
+    </div>
+
+    <!--Selected Elecs Editor Dialogue-->
+    <div id="selectedEditorDialog" class='scDialog' title="Select Settings">
+        <h2 class="w3-center">Display</h2>
+        <div id='selectedEditorDialog-aes'></div>
+        <br>
+        <h2 class="w3-center">Properties</h2>
+        <div id="selectedEditorDialog-props"></div>
     </div>
 
 

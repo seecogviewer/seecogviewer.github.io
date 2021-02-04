@@ -1,6 +1,6 @@
 var vol = {
     'Coronal': null,
-    'Saggital': null,
+    'Sagittal': null,
     'Axial': null,
     'foci': {
         'id': [],
@@ -36,7 +36,7 @@ var sc = {
             color: null,
             on: false
         },
-        Saggital: {
+        Sagittal: {
             scene: null,
             camera: null,
             renderer: null,
@@ -1537,7 +1537,7 @@ $(document).ready(function () {
         let lineEnd;
         const camDist = 200;
         switch (ax) {
-            case 'Saggital':
+            case 'Sagittal':
                 lineEnd = new THREE.Vector3( camDist, 0, 0 );
                 break;
             case 'Coronal':
@@ -1574,7 +1574,7 @@ $(document).ready(function () {
         planesc.add(line);
 
         switch (ax) {
-            case 'Saggital':
+            case 'Sagittal':
                 camera.rotateZ(Math.PI/2);
                 break;
             case 'Coronal':
@@ -1600,6 +1600,125 @@ $(document).ready(function () {
             });
         }
         div2dAnimate();
+    }
+
+    // Create 2D scene
+    function create2DScene(sceneInfo,ax) {
+        let planeScene = new THREE.Scene();
+        planeScene.add(sceneInfo['obj']);
+        let stack = sceneInfo.obj.stack;
+
+        // Create renderer
+        let div2d = document.getElementById(sceneInfo['dom']);
+        let renderer2d = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        renderer2d.setSize(div2d.offsetWidth, div2d.offsetHeight);
+        renderer2d.setClearColor(0x000000, 1);
+        renderer2d.setPixelRatio(window.devicePixelRatio);
+        div2d.appendChild(renderer2d.domElement);
+
+        // Create position for line of camerapole
+        let lineEnd;
+        const camDist = 200;
+        //lineEnd = new THREE.Vector3( camDist, 0, 0 );
+        let mycol;
+        switch (ax) {
+            case 'Sagittal':
+                lineEnd = new THREE.Vector3( camDist, 0, 0 );
+                mycol = 0x00ff00;
+                break;
+            case 'Axial':
+                lineEnd = new THREE.Vector3( 0, 0, camDist );
+                mycol = 0x0000ff;
+                break;
+            case 'Coronal':
+                lineEnd = new THREE.Vector3( 0, camDist, 0 );
+                mycol = 0xff0000;
+                break;
+        }
+
+        // Pole to mount camera
+        let material = new THREE.LineBasicMaterial( { color: mycol } );
+        let points = [];
+        points.push(lineEnd);
+        points.push(sceneInfo.obj.slice.position);
+        //points.push( new THREE.Vector3( 0, 0, 0 ) );
+        //let geometry = new THREE.BufferGeometry().setFromPoints( points );
+        let geometry = new THREE.Geometry().setFromPoints( points );
+        line = new THREE.Line( geometry, material );
+        line.visible = true; // Helpful in debugging cameras
+
+        // The camera
+        let camera = new AMI.OrthographicCamera(
+            renderer2d.domElement.clientWidth / -2,
+            renderer2d.domElement.clientWidth / 2,
+            renderer2d.domElement.clientHeight / 2,
+            renderer2d.domElement.clientHeight / -2,
+            1, // Near
+            100000 //Far
+        );
+
+        // Setup controls
+        const controls = new AMI.TrackballOrthoControl(camera, renderer2d.domElement);
+        controls.staticMoving = true;
+        controls.noRotate = true;
+        camera.controls = controls;
+
+        // set camera
+        let worldbb = stack.worldBoundingBox();
+        let lpsDims = new THREE.Vector3(
+            (worldbb[1] - worldbb[0]) / 2,
+            (worldbb[3] - worldbb[2]) / 2,
+            (worldbb[5] - worldbb[4]) / 2
+        );
+
+        // box: {halfDimensions, center}
+        let box = {
+            center: stack.worldCenter().clone(),
+            halfDimensions: new THREE.Vector3(lpsDims.x + 10, lpsDims.y + 10, lpsDims.z + 10),
+        };
+
+        camera.box = box;
+
+        // const canvas = {
+        //     width: renderer2d.domElement.clientWidth,
+        //     height: renderer2d.domElement.clientWidth,
+        // };
+        
+        camera.directions = [stack.xCosine, stack.yCosine, stack.zCosine];
+        //debugger;
+        camera.canvas.width = renderer2d.domElement.clientWidth;
+        camera.canvas.height = renderer2d.domElement.clientHeight;
+        camera.orientation = ax.toLowerCase();
+        camera.update();
+        //camera.fitBox(2, 1);
+        // camera.position.copy(points[0]);
+        // //camera.invertRows();
+        // line.add(camera);
+        // camera.position.copy(points[0]);
+        // camera.lookAt(0,0,0);
+        planeScene.add(line);
+
+        // Second camera that follows the plane
+        let cam2 = new AMI.OrthographicCamera().copy(camera);
+
+        // Add to global object
+        sc.scenes[ax].camera = camera;
+        sc.scenes[ax].renderer = renderer2d;
+        sc.scenes[ax].scene = planeScene;
+
+        // Render function
+        function div2dAnimate () {
+            //controls.update();
+            renderer2d.render(planeScene, camera);
+        
+            requestAnimationFrame(function () {
+                div2dAnimate();
+            });
+        }
+        div2dAnimate();
+
     }
 
     // Parse Volumes
@@ -1651,25 +1770,28 @@ $(document).ready(function () {
                         'ori': 0,
                         'obj': new AMI.StackHelper(stackT1),
                         'color': 0xff0000,
-                        'axes': ['x', 'z'],
-                        'pos': 'y',
-                        'dom': "plane-coronal"
+                        'axes': ['x', 'y'],
+                        'pos': 'z',
+                        'dom': "plane-coronal",
+                        'scene': null
                     },
-                    'Saggital': {
+                    'Sagittal': {
                         'ori': 1,
                         'obj': new AMI.StackHelper(stackT1),
                         'color': 0x00ff00,
                         'axes': ['y', 'z'],
                         'pos': 'x',
-                        'dom': "plane-saggital"
+                        'dom': "plane-sagittal",
+                        'scene': null
                     },
                     'Axial': {
                         'ori': 2,
                         'obj': new AMI.StackHelper(stackT1),
                         'color': 0x0000ff,
-                        'axes': ['x', 'y'],
-                        'pos': 'z',
-                        'dom': "plane-axial"
+                        'axes': ['x', 'z'],
+                        'pos': 'y',
+                        'dom': "plane-axial",
+                        'scene': null
                     }
                 };
                 for (plane in orients) {
@@ -1679,16 +1801,16 @@ $(document).ready(function () {
                     orients[plane]['obj'].children[0].visible = false;
                     orients[plane]['obj'].orientation = orients[plane]['ori'];
                     
-                    let newScene = new THREE.Scene(); newScene.add(orients[plane]['obj']);
-                    scenePlaneController(newScene,plane,orients[plane]['axes'],orients[plane]['pos']);
-                    sc.scenes.threeD.scene.add(newScene);
+                    //let newScene = new THREE.Scene(); newScene.add(orients[plane]['obj']);
+                    //scenePlaneController(newScene,plane,orients[plane]['axes'],orients[plane]['pos']);
+                    //sc.scenes.threeD.scene.add(newScene);
 
                     // Create 2D plane scene
-                    //if (plane === 'Axial') {
-                        createPlaneScene(newScene,plane,orients[plane]['dom']);
-                    //}
+                    //createPlaneScene(newScene,plane,orients[plane]['dom']);
                     
-                    //planeController(orients[plane]['obj'], plane, orients[plane]['axes']);
+                    planeController(orients[plane]['obj'], plane, orients[plane]['axes']);
+                    create2DScene(orients[plane],plane);
+                    sc.scenes.threeD.scene.add(sc.scenes[plane].scene);
                     //sc.scenes.threeD.scene.add(orients[plane]['obj']);
                 }
             })

@@ -55,7 +55,8 @@ var sc = {
             controls: null,
             color: null,
             on: false
-        }
+        },
+        elecScene: null
     },
     datGui: {
         objs: {
@@ -779,8 +780,8 @@ $(document).ready(function () {
             let eyeCell = elecData.getCells()[0];
             scObj.init(threed,staticImg);
             if (threed) {
-                if (sc.scenes.threeD.scene.getObjectByName(rowID) === undefined) {
-                    sc.scenes.threeD.scene.add(scObj.threeObj);
+                if (sc.elecScene.getObjectByName(rowID) === undefined) {
+                    sc.elecScene.add(scObj.threeObj);
                     $(eyeCell.getElement()).children('i').addClass('fa fa-eye');
                 } else {
                     scObj.update();
@@ -1213,6 +1214,7 @@ $(document).ready(function () {
             this._TextMesh = new THREE.Mesh(geom, mat);
             this._TextMesh.position.z = this.getSize();
             this._TextMesh.type = "elecText";
+            this._TextMesh.visible = aes.elecTextVisible;
             this._TextMesh.onAfterRender = function() {
                 const camera = sc.scenes.threeD.camera;
                 this.lookAt(camera.position.x,camera.position.y,camera.position.z);
@@ -1499,7 +1501,17 @@ $(document).ready(function () {
             });
         }
 
-        planeFolder.add(obj, 'visible').name('Visible');
+        let visibleObj = {'visible': true};
+
+        //planeFolder.add(obj, 'visible').name('Visible');
+        // Keep plane visible in 2D scene but allow to be invisble in 3D scene
+        planeFolder.add(visibleObj, 'visible').name('visible').onChange( function(chng) {
+            if (chng) {
+                sc.scenes.threeD.scene.add(obj.parent);
+            } else {
+                sc.scenes.threeD.scene.remove(obj.parent);
+            }
+        })
         return planeFolder;
     }
 
@@ -1607,6 +1619,7 @@ $(document).ready(function () {
         let planeScene = new THREE.Scene();
         planeScene.add(sceneInfo['obj']);
         let stack = sceneInfo.obj.stack;
+        let slice = sceneInfo.obj.slice;
 
         // Create renderer
         let div2d = document.getElementById(sceneInfo['dom']);
@@ -1616,25 +1629,35 @@ $(document).ready(function () {
         renderer2d.setSize(div2d.offsetWidth, div2d.offsetHeight);
         renderer2d.setClearColor(0x000000, 1);
         renderer2d.setPixelRatio(window.devicePixelRatio);
+        renderer2d.autoClear = false;
+        //renderer2d.localClippingEnabled = true;
         div2d.appendChild(renderer2d.domElement);
 
         // Create position for line of camerapole
-        let lineEnd;
-        const camDist = 200;
+        let lineEnd, mycol, camPosAx, sliceAx, sign;
+        const camDist = 138;
         //lineEnd = new THREE.Vector3( camDist, 0, 0 );
-        let mycol;
         switch (ax) {
             case 'Sagittal':
                 lineEnd = new THREE.Vector3( camDist, 0, 0 );
                 mycol = 0x00ff00;
+                camPosAx = 'x';
+                sliceAx = 'x';
+                sign = 1;
                 break;
             case 'Axial':
                 lineEnd = new THREE.Vector3( 0, 0, camDist );
                 mycol = 0x0000ff;
+                camPosAx = 'z';
+                sliceAx = 'y';
+                sign = 1;
                 break;
             case 'Coronal':
                 lineEnd = new THREE.Vector3( 0, camDist, 0 );
                 mycol = 0xff0000;
+                camPosAx = 'y';
+                sliceAx = 'z';
+                sign = -1;
                 break;
         }
 
@@ -1647,7 +1670,7 @@ $(document).ready(function () {
         //let geometry = new THREE.BufferGeometry().setFromPoints( points );
         let geometry = new THREE.Geometry().setFromPoints( points );
         line = new THREE.Line( geometry, material );
-        line.visible = true; // Helpful in debugging cameras
+        line.visible = true; // Helpful in debugging cameras        
 
         // The camera
         let camera = new AMI.OrthographicCamera(
@@ -1655,15 +1678,30 @@ $(document).ready(function () {
             renderer2d.domElement.clientWidth / 2,
             renderer2d.domElement.clientHeight / 2,
             renderer2d.domElement.clientHeight / -2,
-            1, // Near
-            100000 //Far
+            Math.abs(camDist)-2, // Near, 1 or camDist+1
+            Math.abs(camDist+2) //Far, 10000 or camDist-1
         );
 
+        // Add sphere to camera to help with debugging
+        const mat = new THREE.MeshLambertMaterial({color: mycol});
+        const geo = new THREE.SphereBufferGeometry(2, 32, 32);
+        let mesh = new THREE.Mesh(geo,mat);
+        mesh.name = ax + '_campos';
+        sc.scenes.threeD.scene.add(mesh);
+        //camera.add(mesh);
+        //sc.scenes.threeD.scene.add(camera);
+
         // Setup controls
-        const controls = new AMI.TrackballOrthoControl(camera, renderer2d.domElement);
+        let controls = new AMI.TrackballOrthoControl(camera, renderer2d.domElement);
         controls.staticMoving = true;
         controls.noRotate = true;
+        controls.enableRotate = true;
+        controls.autoRotate = true;
+        controls.enablePan = false;
+        controls.enableZoom = true;
         camera.controls = controls;
+        controls.update();
+        sc.scenes[`${ax}`].controls = controls;
 
         // set camera
         let worldbb = stack.worldBoundingBox();
@@ -1676,7 +1714,11 @@ $(document).ready(function () {
         // box: {halfDimensions, center}
         let box = {
             center: stack.worldCenter().clone(),
-            halfDimensions: new THREE.Vector3(lpsDims.x + 10, lpsDims.y + 10, lpsDims.z + 10),
+            halfDimensions: new THREE.Vector3(
+                lpsDims.x + 10, 
+                lpsDims.y + 10, 
+                lpsDims.z + 10,
+            )
         };
 
         camera.box = box;
@@ -1688,9 +1730,10 @@ $(document).ready(function () {
         
         camera.directions = [stack.xCosine, stack.yCosine, stack.zCosine];
         //debugger;
-        camera.canvas.width = renderer2d.domElement.clientWidth;
-        camera.canvas.height = renderer2d.domElement.clientHeight;
+        camera.canvas.width = renderer2d.domElement.clientWidth/1.5;
+        camera.canvas.height = renderer2d.domElement.clientHeight/1.5;
         camera.orientation = ax.toLowerCase();
+        camera.convention = 'neuro';
         camera.update();
         //camera.fitBox(2, 1);
         // camera.position.copy(points[0]);
@@ -1698,20 +1741,64 @@ $(document).ready(function () {
         // line.add(camera);
         // camera.position.copy(points[0]);
         // camera.lookAt(0,0,0);
-        planeScene.add(line);
-
-        // Second camera that follows the plane
-        let cam2 = new AMI.OrthographicCamera().copy(camera);
+        //planeScene.add(line);
 
         // Add to global object
         sc.scenes[ax].camera = camera;
         sc.scenes[ax].renderer = renderer2d;
         sc.scenes[ax].scene = planeScene;
 
+        // Plane for clipping
+        //let clipPlane = new THREE.Plane(new THREE.Vector3(0,0,0),0);
+
+        // Define variables to help when plane movies
+        let camOrigPos, planeOrigPos, camNewPos, planeNewPos;
+        camOrigPos = camera.position[`${camPosAx}`];
+        planeOrigPos = slice.planePosition[`${sliceAx}`];
+        camNewPos = camOrigPos;
+        planeNewPos = planeOrigPos;
+
+        //Check when need to resize canvas
+        function rendererSizeChecker(renderer) {
+            const canvas = renderer.domElement;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            const needResize = canvas.width !== width || canvas.height !== height;
+            if (needResize) {
+                renderer.setSize(width, height,false);
+            }
+            return needResize;
+        }
+
+
         // Render function
         function div2dAnimate () {
-            //controls.update();
+            
+            // If need to resize renderer, update camera
+            if (rendererSizeChecker(renderer2d)) {
+                const canvas = renderer2d.domElement;
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.canvas.width = canvas.clientWidth/1.5;
+                camera.canvas.height = canvas.clientHeight/1.5;
+                camera.fitBox(2);
+                camera.update();
+                //renderer2d.setSize(div2d.offsetWidth, div2d.offsetHeight);
+                //camera.updateProjectionMatrix();
+            }
+
+            // Update camera positioning
+            planeNewPos = slice.planePosition[`${sliceAx}`];
+            camNewPos = camOrigPos + (planeOrigPos - planeNewPos)*sign;
+            camera.position[`${camPosAx}`] = camNewPos;
+            planeOrigPos = planeNewPos;
+            camOrigPos = camNewPos;
+            mesh.position.copy(camera.position);
+            
+            controls.update();
+            renderer2d.clear();
             renderer2d.render(planeScene, camera);
+            renderer2d.clearDepth();
+            renderer2d.render(sc.elecScene,camera);
         
             requestAnimationFrame(function () {
                 div2dAnimate();
@@ -1845,7 +1932,7 @@ $(document).ready(function () {
         let elecsFolder = sceneGui.addFolder('Electrode Settings');
         elecsFolder.add(aes,'elecTextVisible').name('Text').listen().onChange(function() {
             // Recurse through 3D scene and if the object contains elecText, toggle it
-            sc.scenes.threeD.scene.children.forEach(function(o){
+            sc.elecScene.children.forEach(function(o){
                 let elecText = o.getObjectByProperty('type', 'elecText');
                 if (elecText !== undefined) {
                     elecText.visible = aes['elecTextVisible'];
@@ -1884,6 +1971,33 @@ $(document).ready(function () {
     //#endregion
 
     //#region THREE.JS and Adding to Scenes
+
+    // Create scene just for electrodes
+    function createElecScene() {
+        let escene = new THREE.Scene();
+
+        // Create fake electrodes
+        /*function createElec(){
+            const minval = -50;
+            const maxval = 50;
+            //const mat = new THREE.MeshBasicMaterial({color: 0xff0000});
+            const mat = new THREE.MeshLambertMaterial({color: 0xff0000});
+            //const geo = new THREE.SphereBufferGeometry(2, 32, 32);
+            const geo = new THREE.DodecahedronBufferGeometry(3, 0);
+            const mesh = new THREE.Mesh(geo,mat);
+            mesh.position.set(Math.random()*(maxval-minval)+minval,Math.random()*(maxval-minval)+minval,Math.random()*(maxval-minval)+minval);
+            return mesh;
+        }
+
+        for (let ii=0;ii<100;ii++) {
+            let m = createElec();
+            escene.add(m);
+        }*/
+        const light = new THREE.AmbientLight( 0x737272 );
+        escene.add(light);
+        sc.elecScene = escene;
+        return escene;
+    }
 
     // Set up THREE.JS 3D scene
     function init3DScene() {
@@ -1929,6 +2043,10 @@ $(document).ready(function () {
         let controls = new AMI.TrackballControl(camera, renderer.domElement);
         controls.update();
         sc.scenes.threeD.controls = controls;
+
+        let escene = createElecScene();
+        sc.scenes.threeD.scene.add(escene);
+
 
         // The font to be used in THREE.js scenes
         const font = new THREE.FontLoader().parse(rawText);

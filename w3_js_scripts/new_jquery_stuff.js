@@ -372,6 +372,21 @@ $(document).ready(function () {
         $("#scenesArea").css('width', '50%').show();
         $("#threeDviewArea").css("height", "100%").show();
         $("#planarScenes").hide();
+
+        // If any static images exist then move them over to the elecStatic element
+        imgHolder.activeDOM = 'elecSlideShow';
+        let firstel = true;
+        for (imgii of imgHolder.imgs) {
+            $('#elecSlideShow').append(imgii);
+            if (firstel) {
+                $(imgii).css('display','block');
+                imgHolder.enableSlideShow();
+                firstel = false;
+            } else {
+                $(imgii).hide();
+            }
+            
+        }
     });
 
     // Change view to show 3D and static images: All 3 Columns
@@ -383,6 +398,13 @@ $(document).ready(function () {
         $("#scenesArea").css('width', '33.33%');
         $("#threeDviewArea").css("height", "100%").show();
         $("#elecTable-parent").css("height", "100%");
+
+        // If any static images exist then move them over to the elecStatic element
+        imgHolder.activeDOM = 'elecStatic';
+        for (imgii of imgHolder.imgs) {
+            $('#elecStatic').append(imgii);
+            $(imgii).show();
+        }
     });
 
     // Change view to table, 3D and 2D planes
@@ -394,6 +416,21 @@ $(document).ready(function () {
         $("#scenesArea").css('width', '50%');
         $("#threeDviewArea").css("height", "70%").show();
         $("#planarScenes").css("height", "30%").show();
+
+        // If any static images exist then move them over to the elecStatic element
+        imgHolder.activeDOM = 'elecSlideShow';
+        let firstel = true;
+        for (imgii of imgHolder.imgs) {
+            $('#elecSlideShow').append(imgii);
+            if (firstel) {
+                $(imgii).css('display','block');
+                imgHolder.enableSlideShow();
+                firstel = false;
+            } else {
+                $(imgii).hide();
+            }
+            
+        }
     });
 
     // Change view to table and statics
@@ -403,6 +440,13 @@ $(document).ready(function () {
         $("#elecSlideShow").hide();
         $("#elecStatic").css('width', '50%').show();
         $("#scenesArea").hide();
+
+        // If any static images exist then move them over to the elecStatic element
+        imgHolder.activeDOM = 'elecStatic';
+        for (imgii of imgHolder.imgs) {
+            $('#elecStatic').append(imgii);
+            $(imgii).show();
+        }
     });
 
     /*var origHeight1 = $("#elecTable-parent").height(),
@@ -779,7 +823,7 @@ $(document).ready(function () {
             let rowID = elecData.getData()['elecid'];
             let eyeCell = elecData.getCells()[0];
             scObj.init(threed,staticImg);
-            if (threed) {
+            if (true) {
                 if (sc.elecScene.getObjectByName(rowID) === undefined) {
                     sc.elecScene.add(scObj.threeObj);
                     $(eyeCell.getElement()).children('i').addClass('fa fa-eye');
@@ -787,18 +831,43 @@ $(document).ready(function () {
                     scObj.update();
                 }
             }
-            if (staticImg && scObj.img !== null) {
-                imgHolder.appendImg(elecData.getData()['PICS']);
+            if (staticImg && scObj.img === null) {
+                let imgDOM = imgHolder.appendImg(elecData.getData()['PICS'],elecData.getData()['elecid'] + '-img');
+                
+                //elecImg.onclick = function (event) {
+                imgDOM.onclick = function (event) {
+                    if (event.shiftKey) {
+                        //imgHolder.imgs.splice(this._slideShowIndex,1);
+                        
+                        //scObj.removeElec(elecData);
+                        elecTable.removeElec(elecData);
+
+                        //imgDOM.remove();
+                        elecData.update({'img': null});
+                        //if ($('#elecSlideShow').is(':hidden') === false) {
+                       //     imgHolder.nextSlide(-1);
+                        //}
+                    }
+                }
+                scObj.img = imgDOM;
             }
         },
         removeElec: function(elecData) {
             let scObj = elecData.getData()['scObj'];
             let rowID = elecData.getData()['elecid'];
+            let imgDOM = document.getElementById(elecData.getData()['elecid'] + '-img');
             const threeDVisible = document.getElementById("scenesArea").style.display !== "none";
             let eyeCell = elecData.getCells()[0];
             // If object is visible in 3D scene, remove it
-            if (threeDVisible && scObj.threeObj !== null) {
+            if (scObj.threeObj !== null || imgDOM !== null) {
                 scObj.destroyObj();
+                
+                if (imgDOM !== null) {
+                    imgDOM.remove();
+                    if (imgHolder._slideShowEnabled) {
+                        imgHolder.nextSlide(-1);
+                    }
+                }
                 $(eyeCell.getElement()).children('i').removeClass('fa fa-eye');
             }
     
@@ -1029,29 +1098,34 @@ $(document).ready(function () {
             //this.rightButton.onclick = null;
             this._slideShowEnabled = false;
         },
-        createImg: function(src) {
+        createImg: function(src,htmlImgId=null) {
             if (src !== undefined) {
                 let elecImg = document.createElement("IMG");
                 elecImg.src = src;
+                if (htmlImgId !== null) {
+                    elecImg.id = htmlImgId;
+                }
                 elecImg.className = "elecImg";
                 elecImg.classList.add('w3-display-center');
-                elecImg.onclick = function (event) {
+                /*elecImg.onclick = function (event) {
                     if (event.shiftKey) {
                         //imgHolder.imgs.splice(this._slideShowIndex,1);
                         elecImg.remove();
                         imgHolder.nextSlide(-1);
                     }
-                }
+                }*/
                 return elecImg;
             }
         },
-        appendImg: function (srcData) {
-            htmlImg = this.createImg(srcData);
+        appendImg: function (srcData,htmlImgId) {
+            htmlImg = this.createImg(srcData,htmlImgId);
             if (!this.imgs.includes(htmlImg)) {
                 $(htmlImg).hide();
                 //this.imgs.push(htmlImg);
                 if (!this._slideShowEnabled && this.activeDOM == 'elecSlideShow') {
                     this.enableSlideShow();
+                } else {
+                    $(htmlImg).show();
                 }
                 document.getElementById(this.activeDOM).appendChild(htmlImg);
                 this.imgs.push(htmlImg);
@@ -1284,13 +1358,24 @@ $(document).ready(function () {
             }
         };
         this.destroyObj = function() {
-            this.threeObj.parent.remove(this.threeObj);
-            this.threeObj = null;
+            if (this.threeObj !== null) {
+
+                // If static image exists, remove it
+                /*if (this.threeObj.img !== null) {
+                    this.threeObj.img.remove();
+                }*/
+
+
+                this.threeObj.parent.remove(this.threeObj);
+                this.threeObj = null;
+            }
             this.row.update({"scObj": this});
         };
         this.destroyImg = function() {
-            this.img.remove();
+            /*this.img.remove();
             this.img = null;
+            this.row.update({"scObj": this});*/
+            //document.getElementById(this.name + '-img').remove();
             this.row.update({"scObj": this});
         };
         this.init = function(threed=true,staticImg=true) {
@@ -1300,9 +1385,9 @@ $(document).ready(function () {
                 //this.threeObj.scale.set(this.size,this.size,this.size);
                 this.createThreeObj();
             }
-            if (staticImg && this.img === null) {
+            /*if (staticImg && this.img === null) {
                 this.createImage();
-            }
+            }*/
             this.row.update({"scObj": this});
         };
     }
@@ -1491,15 +1576,71 @@ $(document).ready(function () {
         let parentFolder = sc.datGui.objs['vol'];
         let planeFolder = parentFolder.addFolder(name);
         let origDir = obj.slice.planeDirection;
+        const originalPlaneXYZ = obj.slice.planePosition;
         //debugger;
         planeFolder.add(obj, 'index', 0, obj.orientationMaxIndex, 1).name('Slice').listen();
+        /*
         for (ax of axes) {
             planeFolder.add(obj.slice.planeDirection, ax, -Math.PI * 2, Math.PI * 2, 0.1).name('Rotate' + ax.toUpperCase()).onChange(function (newVal) {
                 //debugger;
+
                 obj.slice.planeDirection = new THREE.Vector3().set(this.object.x, this.object.y, this.object.z);
+
+
+                // Keep
+                let q = obj.slice.geometry.vertices[0];
+                let r = obj.slice.geometry.vertices[1];
+                let s = obj.slice.geometry.vertices[2];
+                let vector1 = new THREE.Vector3().subVectors(r,q);
+                let vector2 = new THREE.Vector3().subVectors(s,q);
+                
+
+
+                // let mag1 = Math.sqrt( (r.x-q.x)^2 + (r.y-q.y)^2 + (r.z-q.z)^2 );
+                // let mag2 = Math.sqrt( (s.x-q.x)^2 + (s.y-q.y)^2 + (s.z-q.z)^2 );
+                // let unitVector1 = new THREE.Vector3().copy(vector1).divideScalar(mag1);
+                // let unitVector2 = new THREE.Vector3().copy(vector2).divideScalar(mag2);
+
+
+                // Keep
+                //let normalVector = new THREE.Vector3().crossVectors(vector1,vector2);
+                //console.log(normalVector.normalize());
+                
+                //let magNorm = Math.sqrt( (normalVector.x-q.x)^2 + (normalVector.y-q.y)^2 + (normalVector.z-q.z)^2 );
+                //let unitNormalVector = new THREE.Vector3().copy(normalVector).divideScalar(magNorm).normalize();
+                // console.log(vector1);
+                // console.log(vector2);
+                // console.log(normalVector);
+                // console.log('Units Vectors');
+                //console.log(unitVector1);
+                //console.log(unitVector2);
+                
+                
+
+
+                // let originalPlaneDirection = obj.slice.planeDirection;
+                
+                // let newPlaneDirection = new THREE.Vector3().set(
+                //     originalPlaneDirection.x - obj.slice.planeDirection.x,
+                //     originalPlaneDirection.y - obj.slice.planeDirection.y,
+                //     originalPlaneDirection.z - obj.slice.planeDirection.z
+                // );
+                // console.log('OriginalPlaneDirection: ' + originalPlaneDirection.x + ',' + originalPlaneDirection.y + ',' + originalPlaneDirection.z);
+                // console.log('NormalDirection: ' + obj.slice.planeDirection.x + ',' + obj.slice.planeDirection.y + ',' + obj.slice.planeDirection.z);
+                // console.log('NewPlaneDirection: ' + newPlaneDirection.x + ',' + newPlaneDirection.y + ',' + newPlaneDirection.z);
+                
+                // Keep
+                let axCamera = sc.scenes[`${name}`].camera;
+                let planeCenterXYZ = new THREE.Vector3().subVectors(originalPlaneXYZ,obj.slice.planePosition);
+                let newCameraPosition = new THREE.Vector3().addVectors(planeCenterXYZ,normalVector.normalize());
+                // //axCamera.position.copy(newPlaneDirection.multiplyScalar(1000));
+                axCamera.position.copy(newCameraPosition);
+
+
+
                 obj.border.helpersSlice = obj.slice;
             });
-        }
+        }*/
 
         let visibleObj = {'visible': true};
 
@@ -1670,7 +1811,8 @@ $(document).ready(function () {
         //let geometry = new THREE.BufferGeometry().setFromPoints( points );
         let geometry = new THREE.Geometry().setFromPoints( points );
         line = new THREE.Line( geometry, material );
-        line.visible = true; // Helpful in debugging cameras        
+        line.visible = true; // Helpful in debugging cameras
+        planeScene.add(line);        
 
         // The camera
         let camera = new AMI.OrthographicCamera(
@@ -1939,6 +2081,16 @@ $(document).ready(function () {
                 }
             });
         });
+
+        // Play with controls settings
+        let controlsFolder = sceneGui.addFolder('Controls');
+        let threeControls = sc.scenes.threeD.controls;
+        controlsFolder.add(threeControls,'rotateSpeed',0,10,0.1);
+        controlsFolder.add(threeControls,'zoomSpeed',0,10,0.1);
+        controlsFolder.add(threeControls,'panSpeed',0,10,0.1);
+        controlsFolder.add(threeControls,'dynamicDampingFactor',0,1,0.1);
+        controlsFolder.add(threeControls,'staticMoving');
+
         let surfsFolder = sceneGui.addFolder('Surfaces');
         let volFolder = sceneGui.addFolder('Volumes');
         sc.datGui.objs['parent'] = sceneGui;
@@ -2041,6 +2193,8 @@ $(document).ready(function () {
 
         // AMI style trackball
         let controls = new AMI.TrackballControl(camera, renderer.domElement);
+        controls.minDistance = 100;
+        controls.maxDistance = 1000;
         controls.update();
         sc.scenes.threeD.controls = controls;
 

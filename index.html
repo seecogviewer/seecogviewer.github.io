@@ -18,8 +18,9 @@
     <link rel="stylesheet" href="external/jquery-ui-1.12.1.custom/jquery-ui.min.css">
 
     <!--Font-Awesome-->
-    <script src="https://kit.fontawesome.com/5828851b96.js" crossorigin="anonymous"></script>
+    <!--<script src="https://kit.fontawesome.com/5828851b96.js" crossorigin="anonymous"></script>-->
     <!--<link rel="stylesheet" href="external/font-awesome-4.7.0/css/font-awesome.min.css">-->
+    <script type="text/javascript" src="external/fontawesome5.js"></script>
 
     <!--Tabulator-->
     <link href="external/tabulator.min.css" rel="stylesheet">
@@ -28,7 +29,8 @@
     <!--dat.gui
     <script type="text/javascript" src="external/dat.gui.min.js"></script>
     <link rel="stylesheet" href="external/dat.gui.css">-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js" integrity="sha512-LF8ZB1iTwi4Qvkm4pekHG4a437Y9Af5ZuwbnW4GTbAWQeR2E4KW8WF+xH8b9psevV7wIlDMx1MH9YfPqgKhA/Q==" crossorigin="anonymous"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js" integrity="sha512-LF8ZB1iTwi4Qvkm4pekHG4a437Y9Af5ZuwbnW4GTbAWQeR2E4KW8WF+xH8b9psevV7wIlDMx1MH9YfPqgKhA/Q==" crossorigin="anonymous"></script>-->
+    <script type="text/javascript" src="external/dat_gui/dat.gui.min.js"></script>
 
     <!--ThreeJS-->
     <!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>-->
@@ -40,8 +42,9 @@
 
     <!--AMI.JS-->
     <!--<script type="text/javascript" src="external/ami.min.js"></script>-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ami.js/0.33.0/ami.js" integrity="sha512-kLrPMhGGqqiZusj/hBuKiqaKmuu0ji0fjr9C3rDpLnxnN/ytUlBftGlicotGT2laImlZuavNUFuQ/jdVWKWNjQ==" crossorigin="anonymous"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/ami.js/0.33.0/ami.js" integrity="sha512-kLrPMhGGqqiZusj/hBuKiqaKmuu0ji0fjr9C3rDpLnxnN/ytUlBftGlicotGT2laImlZuavNUFuQ/jdVWKWNjQ==" crossorigin="anonymous"></script>-->
     <script type="text/javascript" src="external/loaders.freesurfer.js"></script>
+    <script type="text/javascript" src="external/ami.js"></script>
 
     <!--Filesaver.js-->
     <script type="text/javascript" src="external/filesaver/FileSaver.js"></script>
@@ -131,7 +134,7 @@
             margin-left: auto;
             margin-right: auto;
         }
-        
+
 
 
         #elecStatic {
@@ -168,7 +171,7 @@
         }
 
 
-        
+
         .tabulator-header-filter {
             font-size: 8px;
         }
@@ -212,7 +215,7 @@
     <div id="navBar" class="w3-container">
 
         <div id="navbar-son" class="w3-bar w3-black">
-            
+
             <div class="w3-dropdown-hover w3-black">
                 <button class="w3-button">File
                     <i class="fa fa-caret-down"></i>
@@ -250,21 +253,21 @@
                     <a href="#" class="w3-bar-item w3-button">HBML Website</a>
                 </div>
             </div>
-            
+
             <!--<a id="selectElecs" href="#" class="w3-bar-item w3-button w3-right w3-disabled">Select Electrodes</a>-->
-        
+
         </div>
     </div>
 
     <!--Second part of page: Table and Images+3D-->
     <div id="workSpace" class="w3-container w3-row">
-        
+
         <!--The Table-->
         <div id="tableDiv" class="w3-col seecog-col">
             <div id="elecTable-parent" class="w3-row w3-blue">
                 <div id="elecTable-buttons" class="w3-row w3-brown w3-bar">
                     <button id="bttns-selectall" class="w3-button w3-bar-item w3-small elecTable-buttons-item">Select All</button>
-                    
+
                     <button id="elecTable-columns-toggle" class="w3-button w3-bar-item w3-small elecTable-buttons-item">Columns</button>
                     <!--<div class="w3-button w3-bar-item w3-small elecTable-buttons-item ui-widget ui-controlgroup-item ui-button w3-dropdown-hover">
                         Columns
@@ -276,7 +279,7 @@
                             <a id="chng-view4"href="#" class="w3-bar-item w3-button">Static Only</a>
                         </div>
                     </div>-->
-                    
+
                     <label class="w3-bar-item w3-button w3-small elecTable-buttons-item" for="bttns-editmode">EditMode</label>
                     <input class="" type="checkbox" id="bttns-editmode">
                     <button id="bttns-update" class="w3-button w3-bar-item w3-small elecTable-buttons-item">Update Scene</button>
@@ -292,7 +295,7 @@
 
         <!--Div to view static images verticall stacked-->
         <div id="elecStatic" class="w3-col w3-yellow seecog-col"></div>
-        
+
         <!--3D View Area-->
         <!--<div id="threeDviewArea" class="w3-green w3-left w3-container">-->
         <div id="scenesArea" class="w3-rest seecog-col w3-display-container">
@@ -308,7 +311,7 @@
                 <div id="plane-coronal" class="w3-third w3-blue planeDiv"></div>
             </div>
         </div>
-    
+
     </div>
 
     <!--Electrode Aesthetics Editor Dialogue-->

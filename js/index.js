@@ -1811,8 +1811,8 @@ $(document).ready(function () {
         //let geometry = new THREE.BufferGeometry().setFromPoints( points );
         let geometry = new THREE.Geometry().setFromPoints( points );
         line = new THREE.Line( geometry, material );
-        line.visible = true; // Helpful in debugging cameras
-        planeScene.add(line);        
+        //line.visible = true; // Helpful in debugging cameras
+        //planeScene.add(line);        
 
         // The camera
         let camera = new AMI.OrthographicCamera(
@@ -1828,8 +1828,8 @@ $(document).ready(function () {
         const mat = new THREE.MeshLambertMaterial({color: mycol});
         const geo = new THREE.SphereBufferGeometry(2, 32, 32);
         let mesh = new THREE.Mesh(geo,mat);
-        mesh.name = ax + '_campos';
-        sc.scenes.threeD.scene.add(mesh);
+        //mesh.name = ax + '_campos';
+        //sc.scenes.threeD.scene.add(mesh);
         //camera.add(mesh);
         //sc.scenes.threeD.scene.add(camera);
 
@@ -1934,7 +1934,7 @@ $(document).ready(function () {
             camera.position[`${camPosAx}`] = camNewPos;
             planeOrigPos = planeNewPos;
             camOrigPos = camNewPos;
-            mesh.position.copy(camera.position);
+            //mesh.position.copy(camera.position);
             
             controls.update();
             renderer2d.clear();

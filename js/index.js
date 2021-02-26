@@ -571,6 +571,15 @@ $(document).ready(function () {
         elecTableColumns: [
             {
                 formatter: function() {return "<i class=''></i>";},
+                /*formatter: function(cell, formatterParams, onRendered){
+                    onRendered(function() {
+                        if (cell.getRow().getData().scObj.threeObj === null) {
+                            return "<i class=''></i>";
+                        } else {
+                            return "<i class='fa fa-eye'></i>";
+                        }
+                    });
+                },*/
                 titleFormatter: function() {return "<i class='fa fa-eye'></i>";},
                 width: 50,
                 frozen: true,
@@ -580,17 +589,25 @@ $(document).ready(function () {
                         label: 'Show All',
                         action: function(e,column) {
                             console.log('Showing all elecs!');
+                            let groupsOpen = [];
+                            elecTable.obj.getGroups().forEach(function(g) {
+                                const gIsVisible = g.isVisible();
+                                g.show();
+                                for (row of g.getRows()) {
+                                    let notShown = row.getData().scObj.threeObj === null;
+                                    if (notShown) {
+                                        elecTable.displayElec(row);
+                                    }
+                                }
+                                if (!gIsVisible) {
+                                    g.hide();
+                                }
+                            });
                         }
                     },
-                    {
-                        label: 'Show Only Visible',
-                        action: function(e,column) {
-                            console.log('Showing only currently visible elecs!');
-                        }
-                    }
                 ],
                 cellClick: function(e,cell){
-                    const isShown3D = cell.getData().scObj.threeObj !== null;
+                    let isShown3D = cell.getData().scObj.threeObj !== null;
                     const isShownImg = cell.getData().scObj.img !== null;
                     let row = cell.getRow();
                     if (!isShown3D) {
@@ -827,6 +844,8 @@ $(document).ready(function () {
                 if (sc.elecScene.getObjectByName(rowID) === undefined) {
                     sc.elecScene.add(scObj.threeObj);
                     $(eyeCell.getElement()).children('i').addClass('fa fa-eye');
+                    //debugger;
+                    //$(elecData.getCells()[0].getElement()).children('i').addClass('fa fa-eye');
                 } else {
                     scObj.update();
                 }
@@ -1134,6 +1153,7 @@ $(document).ready(function () {
                 }
                 //this.activeDOM.appendChild(htmlImg);
             }
+            return htmlImg;
         },
         destroyImg: function(img) {
 

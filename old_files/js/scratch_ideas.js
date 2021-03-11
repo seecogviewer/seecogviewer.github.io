@@ -766,3 +766,23 @@ var fileFormatter = function(list, options, setFileContents){ debugger;}
 
 // Download function
 sc.elecTable.obj.download(fileFormatter,'data6.csv',{})
+
+
+m = sc.scenes.threeD.scene.getObjectByName('lh.pial');
+numVerts = m.geometry.vertices.length;
+minDist = 10;
+vertIndex = null;
+elec = sc.elecScene.getObjectByName('LGrid60');
+pos = elec.position;
+for (ii=0;ii<numVerts;ii++) {
+    d = pos.distanceTo(m.geometry.vertices[ii]);
+    if (d <= minDist) {
+        minDist = d
+        vertIndex = ii;
+    }
+}
+vertPos = m.geometry.vertices[vertIndex];
+directionVert = new THREE.Vector3().subVectors(vertPos,pos);
+doubleDirectionVert = directionVert.multiplyScalar(2);
+newPos = new THREE.Vector3().addVectors(doubleDirectionVert,pos)
+elec.position.set(newPos.x,newPos.y,newPos.z)

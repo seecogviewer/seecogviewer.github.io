@@ -723,6 +723,65 @@ $(document).ready(function () {
                 }
             }
         ],
+        createRowMenu: function (component, e) {
+            let menu = [{
+                label: "<i class='fa fa-edit'></i> Edit Selected",
+                action: function (e, row) {
+                    //row.getTable().selectRow();
+                    //console.log('Editing!');
+                    $("#selectedEditorDialog").dialog("open");
+                    elecTable.selectedUpdatorDialog();
+                }
+            },
+            {
+                label: "<i class='fa fa-edit'></i> Display Selected",
+                action: function (e, row) {
+                    //row.getTable().selectRow();
+                    e.preventDefault();
+                    let selectedRows = row.getTable().getSelectedRows();
+                    selectedRows.forEach(function (rowX) {
+                        elecTable.displayElec(rowX);
+                    })
+                }
+            },
+            {
+                separator: true
+            }
+            ];
+
+            let surfsMenu = [];
+
+            // Go through each available surface
+            let surfs = Object.keys(sc.datGui.objs['surf'].__folders);
+            let numSurfs = surfs.length;
+            let ii;
+            for (ii=0;ii<numSurfs;ii++) {
+            //for (s of surfs) {
+                let s = surfs[ii];
+                //debugger;
+                surfsMenu.push({
+                    label: s,
+                    action: function (e, row) {
+                        //row.getTable().selectRow();
+                        e.preventDefault();
+                        //let mesh = sc.scenes.threeD.scene.getObjectByName(s);
+                        let selectedRows = row.getTable().getSelectedRows();
+                        selectedRows.forEach(function (rowX) {
+                            //rowX.getData()['scObj'].snap2surf(mesh);
+                            rowX.getData()['scObj'].snap2surf(s);
+                            //elecTable.displayElec(rowX);
+                        });
+                    }
+                });
+            }
+
+            menu.push({
+                label: "<i class='fa fa-share'></i> Snap To Surface <i class='fa fa-caret-right'></i>",
+                menu: surfsMenu
+            });
+
+            return menu;
+        },
         createElecTable: function(inputData) {
             let t = new Tabulator('#elecTable', {
                 placeholder: "Waiting for electrode json file",
@@ -768,7 +827,7 @@ $(document).ready(function () {
                 ],
                 selectablePersistence: false,
                 columnMinWidth: 10,
-                rowContextMenu: this.rowMenu,
+                rowContextMenu: this.createRowMenu,//this.rowMenu,
                 selectable: true,
                 groupDblClick: function (e, group) {
                     group.getRows().forEach(function (row) {
@@ -839,6 +898,9 @@ $(document).ready(function () {
             let scObj = elecData.getData()['scObj'];
             let rowID = elecData.getData()['elecid'];
             let eyeCell = elecData.getCells()[0];
+            /*if (eyeCell === undefined) {
+                debugger;
+            }*/
             scObj.init(threed,staticImg);
             if (true) {
                 if (sc.elecScene.getObjectByName(rowID) === undefined) {
@@ -1397,6 +1459,45 @@ $(document).ready(function () {
             this.row.update({"scObj": this});*/
             //document.getElementById(this.name + '-img').remove();
             this.row.update({"scObj": this});
+        };
+        this.snap2surf = function(meshname) {
+            //debugger;
+            let mesh = sc.scenes.threeD.scene.getObjectByName(meshname);
+            let numVertices = mesh.geometry.vertices.length;
+            let vertexIndex = null;
+            let currentPosition = new THREE.Vector3(this.coords[0],this.coords[1],this.coords[2]);
+            let d,minDist;
+            //debugger;
+            let currentDistance = 999;
+            for (ii=0;ii<numVertices;ii++) {
+                d = currentPosition.distanceTo(mesh.geometry.vertices[ii]);
+                if (d <= currentDistance) {
+                    //minDist = d
+                    currentDistance = d;
+                    vertexIndex = ii;
+                }
+            }
+            //debugger;
+            let vertexPosition = mesh.geometry.vertices[vertexIndex];
+            this.move_location(vertexPosition);
+        };
+        this.move_location = function(newPosition,factor=1) {
+            //debugger;
+            let currentPosition = new THREE.Vector3(this.coords[0],this.coords[1],this.coords[2]);
+            let current2origin = currentPosition.distanceTo(new THREE.Vector3(0,0,0));
+            let new2origin = newPosition.distanceTo(new THREE.Vector3(0,0,0));
+            if (current2origin > new2origin) {
+                newPosition.addScalar(factor);
+            } else {
+                newPosition.subScalar(factor);
+            }
+            //let directionVector = new THREE.Vector3().subVectors(relativePosition,currentPosition);
+            //let newPosition = directionVector.multiplyScalar(factor);
+            if (this.threeObj !== null) {
+                this.threeObj.position.set(newPosition.x,newPosition.y,newPosition.z);
+            }
+            //this.coords = newPosition;
+            //this.row.update({'coords': newPosition});
         };
         this.init = function(threed=true,staticImg=true) {
             if (threed && this.threeObj === null) {

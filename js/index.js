@@ -647,6 +647,15 @@ $(document).ready(function () {
                 field: "elecid",
                 visible: true,
                 headerFilter: "input",
+                /*headerFilterFunc: function(headerValue,rowValue,rowData,filterParams) {
+
+                    if (headerValue != "") {
+                        debugger;
+                        var re = new RegExp(headerValue,'i');
+                        let searcher = rowValue.match(re);
+                        return searcher[0] != "";
+                    }
+                },*/
                 editable: false,
                 frozen: true,
             },
@@ -817,7 +826,7 @@ $(document).ready(function () {
                 resizableColumns: true,
                 movableColumns: true,
                 groupHeader: function(value,count,data,group) {
-                    return value + "<span class='row-hdr-span' style='color:#000; margin-left:10px; margin-right:10px; font-weight: 100; font-size: 12px;'>- " + count + " Electrodes</span>";
+                    return group.getField().toUpperCase() + ' - ' + value + "<span class='row-hdr-span' style='color:#000; margin-left:10px; margin-right:10px; font-weight: 100; font-size: 12px;'>- " + count + " Electrodes</span>";
                 },
                 groupContextMenu: [
                     {

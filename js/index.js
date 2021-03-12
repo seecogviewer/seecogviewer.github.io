@@ -570,7 +570,7 @@ $(document).ready(function () {
         },
         elecTableColumns: [
             {
-                formatter: function() {return "<i class=''></i>";},
+                //formatter: function() {return "<i class=''></i>";},
                 /*formatter: function(cell, formatterParams, onRendered){
                     onRendered(function() {
                         if (cell.getRow().getData().scObj.threeObj === null) {
@@ -580,6 +580,18 @@ $(document).ready(function () {
                         }
                     });
                 },*/
+                formatter: function(cell,formatterParams,onRendered) {
+                    onRendered(function(){
+                        if (cell.getRow().getData()['isVisible'] === true) {
+                            //return "<i class=''></i>";
+                            $(cell.getElement()).children('i').addClass('fa fa-eye');
+                        } else {
+                            //return "<i class='fa fa-eye'></i>";
+                            $(cell.getElement()).children('i').removeClass('fa fa-eye');
+                        }
+                    });
+                    return "<i class=''></i>";
+                },
                 titleFormatter: function() {return "<i class='fa fa-eye'></i>";},
                 width: 50,
                 frozen: true,
@@ -590,7 +602,8 @@ $(document).ready(function () {
                         action: function(e,column) {
                             console.log('Showing all elecs!');
                             let groupsOpen = [];
-                            elecTable.obj.getGroups().forEach(function(g) {
+                            e.preventDefault();
+                            /*elecTable.obj.getGroups().forEach(function(g) {
                                 const gIsVisible = g.isVisible();
                                 g.show();
                                 for (row of g.getRows()) {
@@ -602,17 +615,29 @@ $(document).ready(function () {
                                 if (!gIsVisible) {
                                     g.hide();
                                 }
+                            });*/
+                            elecTable.obj.getRows().forEach(function(row) {
+                                if (row.getData()['isVisible'] === false) {
+                                    elecTable.displayElec(row);
+                                    if (row.getCells().length !== 0) {
+                                        let cell = row.getCells()[0];
+                                        $(cell.getElement()).children('i').addClass('fa fa-eye');
+                                    }
+                                }
                             });
                         }
                     },
                 ],
                 cellClick: function(e,cell){
-                    let isShown3D = cell.getData().scObj.threeObj !== null;
-                    const isShownImg = cell.getData().scObj.img !== null;
+                    //let isShown3D = cell.getData().scObj.threeObj !== null;
+                    //const isShownImg = cell.getData().scObj.img !== null;
+                    let isShown = cell.getRow().getData()['isVisible'];
                     let row = cell.getRow();
-                    if (!isShown3D) {
+                    if (!isShown) {
+                        $(cell.getElement()).children('i').addClass('fa fa-eye');
                         elecTable.displayElec(row);
                     } else {
+                        $(cell.getElement()).children('i').removeClass('fa fa-eye');
                         elecTable.removeElec(row);
                     }
                 }
@@ -869,6 +894,9 @@ $(document).ready(function () {
                 }
             }
 
+            // Add visibility field
+            elecData['isVisible'] = false;
+
             // Holder for electrode object that will be added to 3D scene
             elecData['scObj'] = null;
 
@@ -905,14 +933,15 @@ $(document).ready(function () {
             if (true) {
                 if (sc.elecScene.getObjectByName(rowID) === undefined) {
                     sc.elecScene.add(scObj.threeObj);
-                    $(eyeCell.getElement()).children('i').addClass('fa fa-eye');
+                    elecData.update({'isVisible': true});
+                    //$(eyeCell.getElement()).children('i').addClass('fa fa-eye');
                     //debugger;
                     //$(elecData.getCells()[0].getElement()).children('i').addClass('fa fa-eye');
                 } else {
                     scObj.update();
                 }
             }
-            if (staticImg && scObj.img === null) {
+            if (staticImg && scObj.img === null && elecData.getData()['PICS'] !== "") {
                 let imgDOM = imgHolder.appendImg(elecData.getData()['PICS'],elecData.getData()['elecid'] + '-img');
                 
                 //elecImg.onclick = function (event) {
@@ -949,13 +978,15 @@ $(document).ready(function () {
                         imgHolder.nextSlide(-1);
                     }
                 }
-                $(eyeCell.getElement()).children('i').removeClass('fa fa-eye');
+                //$(eyeCell.getElement()).children('i').removeClass('fa fa-eye');
             }
     
             // If object is visible in static image scene, delete it
             if (scObj.img !== null) {
                 scObj.destroyImg();
             }
+
+            elecData.update({'isVisible': false});
         },
         createColumnUpdateDialog: function() { // Create dialogue to update column definition
 

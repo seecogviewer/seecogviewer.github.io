@@ -627,6 +627,23 @@ $(document).ready(function () {
                             });
                         }
                     },
+                    {
+                        label: 'Remove All',
+                        action: function(e,column) {
+                            console.log('Removing all elecs!');
+                            let groupsOpen = [];
+                            e.preventDefault();
+                            elecTable.obj.getRows().forEach(function(row) {
+                                if (row.getData()['isVisible'] === true) {
+                                    elecTable.removeElec(row);
+                                    if (row.getCells().length !== 0) {
+                                        let cell = row.getCells()[0];
+                                        $(cell.getElement()).children('i').removeClass('fa fa-eye');
+                                    }
+                                }
+                            });
+                        }
+                    },
                 ],
                 cellClick: function(e,cell){
                     //let isShown3D = cell.getData().scObj.threeObj !== null;

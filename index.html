@@ -283,7 +283,7 @@
                     <label class="w3-bar-item w3-button w3-small elecTable-buttons-item" for="bttns-editmode">EditMode</label>
                     <input class="" type="checkbox" id="bttns-editmode">
                     <button id="bttns-update" class="w3-button w3-bar-item w3-small elecTable-buttons-item">Update Scene</button>
-                    <button class="w3-button w3-bar-item w3-small elecTable-buttons-item">Search</button>
+                    <button id="bttns-search" class="w3-button w3-bar-item w3-small elecTable-buttons-item">Search</button>
                 </div>
                 <div id="elecTable" class="w3-row w3-gray"></div>
             </div>
@@ -324,7 +324,7 @@
     </div>
 
     <!--Column Editor Dialogue-->
-    <div id="columnEditoDialog" class='scDialog' title="Show/Hide and Edit columns">
+    <div id="columnEditorDialog" class='scDialog' title="Show/Hide and Edit columns">
         <div id="columnEditor"></div>
     </div>
 
@@ -335,6 +335,12 @@
         <br>
         <h2 class="w3-center">Properties</h2>
         <div id="selectedEditorDialog-props"></div>
+    </div>
+
+    <!--Search Dialogue-->
+    <div id="searchDialog" class='scDialog' title="Search for Electrodes">
+        <button id="add-filter-bttn">Add Filter</button>
+        <div id="searchEditor"></div>
     </div>
 
 

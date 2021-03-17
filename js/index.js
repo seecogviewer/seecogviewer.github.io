@@ -359,6 +359,81 @@ $(document).ready(function () {
         }
     });
 
+    // Search dialogue
+    $("#searchDialog").dialog({
+        resizable: true,
+        autoOpen: false,
+        width: 700,
+        height: 500,
+        modal: true,
+        buttons: {
+            "Update": function() {
+                console.log('not yet');
+            },
+            Cancel: function() {
+                $( this ).dialog( "close" );
+            }
+        },
+        //create: createEditorDialog,
+        close: function() {
+            //aes['tmpEditor'] = null;
+            console.log('Closed!');
+        }
+    });
+
+    $( "#bttns-search" ).on( "click", function() {
+        if (elecTable.obj !== null) {
+            $( "#searchDialog" ).dialog( "open" );
+
+            // Columns that can be selected to filter for
+            let cols = elecTable.obj.getColumns();
+            //let validCols = [];
+            let validCols = {};
+            for (c of cols) {
+                if (c.getDefinition()['title']) {
+                    //validCols.push({[c.getField()]: c.getDefinition()['title']});
+                    //validCols[[c.getField()]] = c.getDefinition()['title'];
+                    validCols[c.getDefinition()['title']] = c.getDefinition()['title'];
+                }
+            }
+
+            // Options for filtering values
+            let searchFilters = ["=",">","<","<=",">=","like","!="];
+            let searchFiltersObj = {};
+            for (v of searchFilters) {searchFiltersObj[`${v}`]=v};
+
+            // Set data variable
+            let idNum = 1;
+            
+            // Create the table for filters
+            let searchTable = new Tabulator('#searchEditor', {
+                data: [{id: idNum}],
+                index: "id",
+                layout: "fitColumns",
+                columns: [
+                    {
+                        formatter: function() {return "<i class='fas fa-minus-circle'></i>";},
+                        width: 30,
+                        cellClick: function(e,cell) {
+                            cell.getRow().delete();
+                        }
+                    },
+                    {title: 'Property', field: 'property', editor: 'select', editorParams: {values: validCols }},
+                    {title: 'Filter', field: 'filter', editor: 'select', editorParams: {values: searchFiltersObj }},
+                    {title: 'Value', field: 'inputValue', editor: 'input'},
+                ],
+                columnMinWidth: 60
+            });
+
+            // Button to add additional filter
+            $("#add-filter-bttn").button();
+            $( "#add-filter-bttn" ).on( "click", function() {
+                idNum += 1;
+                searchTable.addRow({id: idNum});
+            });
+        }
+    });
+
     //#endregion
 
 
@@ -1148,12 +1223,12 @@ $(document).ready(function () {
     // Set the button for updating column definitions
     $("#elecTable-columns-toggle").button();
     $( "#elecTable-columns-toggle" ).on( "click", function() {
-        $( "#columnEditoDialog" ).dialog( "open" );
+        $( "#columnEditorDialog" ).dialog( "open" );
         elecTable.createColumnUpdateDialog();
     });
 
     // Update column definitions
-    $("#columnEditoDialog").dialog({
+    $("#columnEditorDialog").dialog({
         resizable: true,
         autoOpen: false,
         width: 700,
@@ -1711,9 +1786,12 @@ $(document).ready(function () {
                 let surfExt = files[idx].name.split('.')[1];
                 const material = new THREE.MeshLambertMaterial({
                     color: sc.surfColors[surfExt],
-                    transparent: true
+                    transparent: true,
+                    depthTest: true,
+                    depthWrite: false,
+                    side: THREE.FrontSide
                 });
-                material.side = THREE.FrontSide;
+                //material.side = THREE.FrontSide;
                 brainVol.computeVertexNormals();
                 let mesh = new THREE.Mesh(brainVol, material);
                 mesh.name = files[idx].name;
@@ -1725,7 +1803,7 @@ $(document).ready(function () {
                     mesh.renderOrder = 7;
                 } else {
                     mesh.renderOrder = 5;
-                    mesh.material.depthWrite = false;
+                    //mesh.material.depthWrite = false;
                 }
 
                 // Add to scene

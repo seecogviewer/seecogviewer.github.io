@@ -786,3 +786,39 @@ directionVert = new THREE.Vector3().subVectors(vertPos,pos);
 doubleDirectionVert = directionVert.multiplyScalar(2);
 newPos = new THREE.Vector3().addVectors(doubleDirectionVert,pos)
 elec.position.set(newPos.x,newPos.y,newPos.z)
+
+// Regex filter function
+let input = 'l*'
+let re = new RegExp(input,'i');
+let rowid = 'LTx11';
+let outcome = rowid.match(re);
+
+
+
+children=['lh.pial','lh.white','lh.hippocampus','rh.pial','rh.white','rh.hippocampus']
+for (x of children) {
+    o = sc.scenes.threeD.scene.getObjectByName(x);
+    o.renderOrder = 10;
+    o.material.depthWrite = false;
+    o.material.depthTest = true;
+    o.material.needsUpdate = true;
+}
+
+
+
+o.material.depthWrite = false;
+o.material.depthTest = true;
+o.materialside = THREE.FrontSide;
+o.material.needsUpdate = true;
+
+
+
+elecTable.obj.getColumns()[1].getDefinition()['title']
+
+cols = elecTable.obj.getColumns();
+validCols = [];
+for (c of cols) {
+    if (c.getDefinition()['title']) {
+        validCols.push({[c.getField()]: c.getDefinition()['title']});
+    }
+}

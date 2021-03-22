@@ -359,81 +359,6 @@ $(document).ready(function () {
         }
     });
 
-    // Search dialogue
-    $("#searchDialog").dialog({
-        resizable: true,
-        autoOpen: false,
-        width: 700,
-        height: 500,
-        modal: true,
-        buttons: {
-            "Update": function() {
-                console.log('not yet');
-            },
-            Cancel: function() {
-                $( this ).dialog( "close" );
-            }
-        },
-        //create: createEditorDialog,
-        close: function() {
-            //aes['tmpEditor'] = null;
-            console.log('Closed!');
-        }
-    });
-
-    $( "#bttns-search" ).on( "click", function() {
-        if (elecTable.obj !== null) {
-            $( "#searchDialog" ).dialog( "open" );
-
-            // Columns that can be selected to filter for
-            let cols = elecTable.obj.getColumns();
-            //let validCols = [];
-            let validCols = {};
-            for (c of cols) {
-                if (c.getDefinition()['title']) {
-                    //validCols.push({[c.getField()]: c.getDefinition()['title']});
-                    //validCols[[c.getField()]] = c.getDefinition()['title'];
-                    validCols[c.getDefinition()['title']] = c.getDefinition()['title'];
-                }
-            }
-
-            // Options for filtering values
-            let searchFilters = ["=",">","<","<=",">=","like","!="];
-            let searchFiltersObj = {};
-            for (v of searchFilters) {searchFiltersObj[`${v}`]=v};
-
-            // Set data variable
-            let idNum = 1;
-            
-            // Create the table for filters
-            let searchTable = new Tabulator('#searchEditor', {
-                data: [{id: idNum}],
-                index: "id",
-                layout: "fitColumns",
-                columns: [
-                    {
-                        formatter: function() {return "<i class='fas fa-minus-circle'></i>";},
-                        width: 30,
-                        cellClick: function(e,cell) {
-                            cell.getRow().delete();
-                        }
-                    },
-                    {title: 'Property', field: 'property', editor: 'select', editorParams: {values: validCols }},
-                    {title: 'Filter', field: 'filter', editor: 'select', editorParams: {values: searchFiltersObj }},
-                    {title: 'Value', field: 'inputValue', editor: 'input'},
-                ],
-                columnMinWidth: 60
-            });
-
-            // Button to add additional filter
-            $("#add-filter-bttn").button();
-            $( "#add-filter-bttn" ).on( "click", function() {
-                idNum += 1;
-                searchTable.addRow({id: idNum});
-            });
-        }
-    });
-
     //#endregion
 
 
@@ -559,6 +484,8 @@ $(document).ready(function () {
         obj: null,
         domID: "elecTableChild",
         groupBy: ['gridid'],
+        filters: [],
+        filter_table: null,
         tmpColumnUpdate: null,
         tmpSelectedEditor: {'aes': null, 'properties': null},
         selectedUpdatorDialog: function() {
@@ -1103,9 +1030,11 @@ $(document).ready(function () {
             // Get column definitions. Use as rows
             let dialogRows = [];
             let columnDefs = elecTable.obj.getColumnDefinitions().slice(2);
+            let newRow, isGrouped;
             columnDefs.forEach(function(c) {
-                const isGrouped = c['field'].indexOf(elecTable.groupBy) !== -1 ? true: false;
-                let newRow = {'column': c.title, 'fieldname': c.field, 'isVisible': c.visible, 'groupBy': isGrouped, 'filter': ""};
+                //isGrouped = c['field'].indexOf(elecTable.groupBy) !== -1 ? true: false;
+                isGrouped = elecTable.groupBy.includes(c['field']);
+                newRow = {'column': c.title, 'fieldname': c.field, 'isVisible': c.visible, 'groupBy': isGrouped, 'filter': ""};
                 dialogRows.push(newRow);
             });
 
@@ -1120,6 +1049,36 @@ $(document).ready(function () {
             });
 
             this.tmpColumnUpdate = columnTable;
+        },
+        update_filters: function() {
+
+            // Get filter table
+            let filter_table = this.filter_table;
+            let t_rows = filter_table.getRows();
+
+            // Reformat row components to be usable as filters for tabulator
+            let new_filters = [];
+            let data, field, ftype, val;
+            for (r of t_rows) {
+                data = r.getData();
+                rfield = data['property'];
+                ftype = data['filter'] === 'unlike' ? '!=' : data['filter'];
+                val = data['inputValue'];
+
+                // Check to see if the input value is of boolean type
+                let true_vals = ['yes','true'];
+                let false_vals = ['no','false'];
+                if (true_vals.includes(val.toLowerCase())) {
+                    val = true;
+                } else if (false_vals.includes(val.toLowerCase())) {
+                    val = false;
+                }
+
+                new_filters.push({field: rfield, type: ftype, value: val});
+            }
+            this.obj.setFilter(new_filters);
+            this.filters = new_filters;
+
         },
         updateColumnSettings: function() {
             let newColSettings = this.tmpColumnUpdate.getRows();
@@ -1192,6 +1151,92 @@ $(document).ready(function () {
             saveAs(file);
         }
     }
+
+    // Search dialogue
+    $("#searchDialog").dialog({
+        resizable: true,
+        autoOpen: false,
+        width: 700,
+        height: 500,
+        modal: true,
+        buttons: {
+            "Search": function() {
+                console.log('not yet');
+                elecTable.update_filters();
+            },
+            Cancel: function() {
+                $( this ).dialog( "close" );
+            }
+        },
+        //create: createEditorDialog,
+        close: function() {
+            //aes['tmpEditor'] = null;
+            console.log('Closed!');
+        }
+    });
+    
+    $( "#bttns-search" ).on( "click", function() {
+        if (elecTable.obj !== null) {
+            $( "#searchDialog" ).dialog( "open" );
+
+            // Columns that can be selected to filter for
+            let cols = elecTable.obj.getColumns();
+            //let validCols = [];
+            let validCols = {};
+            for (c of cols) {
+                if (c.getDefinition()['title']) {
+                    //validCols.push({[c.getField()]: c.getDefinition()['title']});
+                    //validCols[[c.getField()]] = c.getDefinition()['title'];
+                    validCols[c.getDefinition()['title']] = c.getDefinition()['title'];
+                }
+            }
+
+            // Get current filters
+            let current_filters = elecTable.filters;
+
+            // Options for filtering values
+            let searchFilters = ["=",">","<","<=",">=","like","unlike"];
+            let searchFiltersObj = {};
+            for (v of searchFilters) {searchFiltersObj[`${v}`]=v};
+
+            // Set data variable
+            let idNum = 1;
+            current_filters.forEach(function(f) {
+                f['id'] = idNum;
+                idNum += 1;
+            });
+
+            // Create the table for filters
+            let searchTable = new Tabulator('#searchEditor', {
+                //data: [{id: idNum}],
+                data: current_filters,
+                index: "id",
+                layout: "fitColumns",
+                columns: [
+                    {
+                        formatter: function() {return "<i class='fas fa-minus-circle'></i>";},
+                        width: 30,
+                        cellClick: function(e,cell) {
+                            cell.getRow().delete();
+                        }
+                    },
+                    {title: 'Property', field: 'property', editor: 'select', editorParams: {values: validCols }},
+                    {title: 'Filter', field: 'filter', editor: 'select', editorParams: {values: searchFiltersObj }},
+                    {title: 'Value', field: 'inputValue', editor: 'input'},
+                ],
+                columnMinWidth: 60
+            });
+            elecTable.filter_table = searchTable;
+
+            // Button to add additional filter
+            $("#add-filter-bttn").button();
+            $( "#add-filter-bttn" ).on( "click", function() {
+                idNum += 1;
+                searchTable.addRow({id: idNum});
+            });
+        }
+    });
+    
 
     // Assign download function to a button
     $("#download-bttn").click(function() {
@@ -1788,7 +1833,7 @@ $(document).ready(function () {
                     color: sc.surfColors[surfExt],
                     transparent: true,
                     depthTest: true,
-                    depthWrite: false,
+                    depthWrite: true,
                     side: THREE.FrontSide
                 });
                 //material.side = THREE.FrontSide;
@@ -2362,7 +2407,15 @@ $(document).ready(function () {
     function addGui4Surf(mesh) {
         let surfFolder = sc.datGui.objs['surf'];
         let newSurfFolder = surfFolder.addFolder(mesh.name);
-        newSurfFolder.add(mesh.material, 'opacity', 0, 1).name('Opacity');
+        newSurfFolder.add(mesh.material, 'opacity', 0, 1).name('Opacity').onChange(function(val) {
+            if (val < 1) {
+                mesh.material.depthWrite = false;
+                mesh.material.depthTest = true;
+            } else {
+                mesh.material.depthWrite = true;
+                mesh.material.depthTest = true;
+            }
+        });
         let dummyColor = {
             color: "#" + mesh.material.color.getHexString()
         };
@@ -2372,6 +2425,10 @@ $(document).ready(function () {
             let newColor = colorVal.replace('#', '0x');
             mesh.material.color.setHex(newColor);
         });
+
+        //newSurfFolder.add(mesh.material,'depthWrite').name('depthWrite').listen();
+        //newSurfFolder.add(mesh.material,'depthTest').name('depthTest').listen();
+
         return surfFolder;
     }
 

@@ -822,3 +822,11 @@ for (c of cols) {
         validCols.push({[c.getField()]: c.getDefinition()['title']});
     }
 }
+
+
+current_filters = [{'field': 'anat', 'type': 'like', 'value': 'ctx'},{'field': 'anat', 'type': 'like', 'value': 'ctx'},{'field': 'anat', 'type': 'like', 'value': 'ctx'}];
+idnum = 0;
+current_filters.forEach(function(f) {
+    f['id'] = idnum;
+    idnum += 1;
+})

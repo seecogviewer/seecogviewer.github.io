@@ -1285,6 +1285,17 @@ $(document).ready(function () {
                 $( this ).dialog( "close" );
                 console.log('WOOHOO! It worked!');
             },
+            "New Column": function () {
+                elecTable.obj.addColumn({title: 'New',field: 'new'},false)
+                .then(function() {
+                    debugger;
+                    let rows = elecTable.obj.getRows();
+                    rows.forEach(function(r) {
+                        r.update({"new": "defaultVal"});
+                    });
+                });
+                console.log('Not yet');
+            },
             Cancel: function() {
                 $( this ).dialog( "close" );
             }

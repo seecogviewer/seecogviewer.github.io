@@ -830,3 +830,8 @@ current_filters.forEach(function(f) {
     f['id'] = idnum;
     idnum += 1;
 })
+
+
+
+
+rows = elecTable.obj.getRows()

@@ -1922,6 +1922,14 @@ $(document).ready(function () {
                     type: overlay['type']
                 };
 
+                // Non-mandatory but possible options within the import
+                let otherkeys = ['labels','ctable'];
+                for (k of otherkeys) {
+                    if (overlay.hasOwnProperty(k)) {
+                        mesh.userData['overlays'][overlayname][k] = overlay[k];
+                    }
+                }
+
                 return {'mesh': mesh, 'name': overlayname};
             })
             .then(function(d) {
@@ -2525,11 +2533,12 @@ $(document).ready(function () {
             // Set params for heatmap
             let funcLut = new THREE.Lut('cooltowarm',200);
             //debugger;
-            //let odata = [...overlayobj.data.sort()];
-            //let oMin = odata[0];
-            //let oMax = odata[odata.length - 1];
-            funcLut.setMin(0);
-            funcLut.setMax(4.2);
+            let odata = [...overlayobj.data];
+            odata = odata.sort();
+            let oMin = odata[0];
+            let oMax = odata[odata.length - 1];
+            funcLut.setMin(oMin);
+            funcLut.setMax(oMax);
             //funcLut.setMin(Math.min(...overlayobj.data));
             //funcLut.setMax(Math.max(...overlayobj.data));
             const verts = ['a','b','c'];
@@ -2577,7 +2586,29 @@ $(document).ready(function () {
             })
 
         } else if (overlaytype === 'atlas') {
-            // Stuff for an atlas
+            
+            // Data for each vertex and corresponding colors
+            let vertvals = overlayobj['data'];
+            let labels = overlayobj['labels'];
+            let ctable = overlayobj['ctable'];
+            const verts = ['a','b','c'];
+            
+            // Change vertex colors to match the label
+            mesh.geometry.faces.forEach(function(f){
+                var jj = 0;
+                for(v of verts) {
+                    let label_idx = vertvals[f[v]];
+                    // debugger;
+                    //f.vertexColors[jj].setRGB(ctable[v][0], ctable[v][1],ctable[v][2]);
+                    f.vertexColors[jj] = new THREE.Color(ctable[label_idx][0]/255, ctable[label_idx][1]/255,ctable[label_idx][2]/255);
+                    jj++;
+                }
+            });
+            mesh.material.vertexColors = THREE.VertexColors;
+            mesh.material.needsUpdate = true;
+            mesh.geometry.colorsNeedUpdate = true;
+            mesh.geometry.elementsNeedUpdate = true;
+
         } else if (overlaytype === 'default') {
             mesh.material.vertexColors = false;
             mesh.material.needsUpdate = true;

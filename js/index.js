@@ -1864,15 +1864,80 @@ $(document).ready(function () {
 
                 // Add to scene
                 scene.add(mesh);
-                controller = addGui4Surf(mesh);
+                //debugger;
 
                 // Store the types of skins and their controllers this mesh has
-                mesh.userData['skins'] = {
+                mesh.userData['overlays'] = {
                     default: {
-                        material: material,
-                        controller: controller
+                        data: "NA",
+                        type: "default",
+                        //material: material,
+                        //controller: controller
                     }
                 };
+                meshGui = addGui4Surf(mesh);
+                mesh.userData['gui'] = meshGui;
+
+                updateMeshOverlay(mesh,'default');
+
+            })
+            .catch(function (error) {
+                window.console.log('oops... something went wrong...');
+                window.console.log(error);
+            })
+        );
+    }
+
+    // Parse overlays for meshes
+    function parseOverlay(idx, files) {
+        return (
+            Promise.resolve()
+            .then(function () {
+                return new Promise(function (resolve, reject) {
+                    let myReader = new FileReader();
+                    // should handle errors too...
+                    myReader.addEventListener('load', function (e) {
+                        resolve(e.target.result);
+                    });
+                    myReader.readAsText(files[idx]);
+                });
+            })
+            .then(function (rawText) {
+                //debugger;
+                let overlay = JSON.parse(rawText);
+
+                // Grab the object its' meant for
+                let mesh = sc.scenes.threeD.scene.getObjectByName(overlay['mesh']);
+                
+                let overlayname;
+                if (overlay.hasOwnProperty('name')) {
+                    overlayname = overlay.name;
+                } else {
+                    overlayname = files[idx].name.split('.')[0];
+                }
+                
+                // Add this as an optional overlay for the mesh
+                mesh.userData['overlays'][overlayname] = {
+                    data: overlay['data'],
+                    type: overlay['type']
+                };
+
+                return {'mesh': mesh, 'name': overlayname};
+            })
+            .then(function(d) {
+                let mesh = d.mesh;
+                let overlayname = d.name;
+                let meshGui = mesh.userData.gui;
+                /*
+                let skinTypes = Object.keys( mesh.userData['overlays'] );
+                //debugger;
+                let skinObj = {
+                    'overlay': overlayname
+                };
+                meshGui.__controllers[2].remove();
+                meshGui.add(skinObj,'overlay',skinTypes).name('Overlays');
+                */
+                updateMeshOverlay(mesh,overlayname,importing=true);
             })
             .catch(function (error) {
                 window.console.log('oops... something went wrong...');
@@ -2413,6 +2478,125 @@ $(document).ready(function () {
         guiContainer.appendChild(sceneGui.domElement);
     }
 
+    // Update dat.gui dropdown options
+    function updateMeshOverlay(mesh,overlayname,importing=false) {
+        let meshGui = mesh.userData['gui'];
+        /*let skinTypes = Object.keys( mesh.userData['overlays'] );
+        let skinObj = {
+            'overlay': '<new_overlay_name>'
+        };*/
+        let overlayobj = mesh.userData['overlays'][overlayname];
+        let overlaytype = overlayobj['type'];
+
+        // Remove any additional controllers
+        let ncontrollers = meshGui.__controllers.length;
+        if (ncontrollers > 2) {
+            for (ii=ncontrollers-1;ii>1;ii--) {
+                meshGui.__controllers[ii].remove();
+            }
+        }
+
+        // Update available options in SkinTypes
+        if (importing) {
+            if (meshGui.__controllers.length == 2) {
+                meshGui.__controllers[1].remove();
+            }
+            let skinTypes = Object.keys( mesh.userData['overlays'] );
+            let skinObj = {
+                'overlay': overlayname
+            };
+            let skinController = meshGui.add(skinObj,'overlay',skinTypes).name('Overlays');
+            skinController.onChange(function(val) {
+                updateMeshOverlay(mesh,val);
+            })
+        }
+
+        //meshGui.__controllers[2].remove();
+        //meshGui.add(skinObj,'overlay',skinTypes).name('Overlays');
+
+        // If something other than default skin then add subfolder with additional options
+        if (overlaytype === 'heatmap') {
+
+            //meshGui.__controllers[2].remove();
+
+            // Add heatmap subfolder
+            //let overlayFolder = meshGui.addFolder('Overlay');
+
+            // Set params for heatmap
+            let funcLut = new THREE.Lut('cooltowarm',200);
+            //debugger;
+            //let odata = [...overlayobj.data.sort()];
+            //let oMin = odata[0];
+            //let oMax = odata[odata.length - 1];
+            funcLut.setMin(0);
+            funcLut.setMax(4.2);
+            //funcLut.setMin(Math.min(...overlayobj.data));
+            //funcLut.setMax(Math.max(...overlayobj.data));
+            const verts = ['a','b','c'];
+
+            // Update the material
+            let cols = overlayobj.data.map(function(n){return funcLut.getColor(n)}); 
+            mesh.geometry.faces.forEach(function(f){
+                var jj = 0;
+                for(v of verts) {
+                    f.vertexColors[jj] = ( cols[f[v]] );
+                    jj++;
+                }
+            });
+            mesh.material.vertexColors = THREE.VertexColors;
+            mesh.material.needsUpdate = true;
+            mesh.geometry.colorsNeedUpdate = true;
+            mesh.geometry.elementsNeedUpdate = true;
+
+            // Add min and max controllers
+            let minSlider = meshGui.add(funcLut,'minV',funcLut.minV, funcLut.maxV).name('Min').listen();
+            minSlider.onChange(function(newMin){
+                let newColors = overlayobj.data.map(function(n){ return n > newMin ? funcLut.getColor(n) : new THREE.Color(0.5,0.5,0.5)});
+                mesh.geometry.faces.forEach(function(f){
+                    var kk = 0;
+                    for(v of verts) {
+                        f.vertexColors[kk] = ( newColors[f[v]] );
+                        kk++;
+                    }
+                });
+                mesh.geometry.colorsNeedUpdate = true;
+                mesh.geometry.elementsNeedUpdate = true;
+            })
+            let maxSlider = meshGui.add(funcLut,'maxV',funcLut.minV, funcLut.maxV).name('Max').listen();
+            maxSlider.onChange(function(newMax){
+                let newColors = overlayobj.data.map(function(n){ return n < newMax ? funcLut.getColor(funcLut.maxV) : funcLut.getColor(n)});
+                mesh.geometry.faces.forEach(function(f){
+                    var kk = 0;
+                    for(v of verts) {
+                        f.vertexColors[kk] = ( newColors[f[v]] );
+                        kk++;
+                    }
+                });
+                mesh.geometry.colorsNeedUpdate = true;
+                mesh.geometry.elementsNeedUpdate = true;
+            })
+
+        } else if (overlaytype === 'atlas') {
+            // Stuff for an atlas
+        } else if (overlaytype === 'default') {
+            mesh.material.vertexColors = false;
+            mesh.material.needsUpdate = true;
+            mesh.geometry.colorsNeedUpdate = true;
+            mesh.geometry.elementsNeedUpdate = true;
+            let dummyColor = {
+                color: "#" + mesh.material.color.getHexString()
+            };
+            let colorChanger = meshGui.addColor(dummyColor, 'color').name('Color');
+            //colorChanger.initialValue = "#" + mesh.material.color.getHexString();
+            colorChanger.onChange(function (colorVal) {
+                let newColor = colorVal.replace('#', '0x');
+                mesh.material.color.setHex(newColor);
+            });
+        } else {
+            // Unknown type
+        }
+    }
+
 
     // Adding dat.gui to the scene for meshes
     function addGui4Surf(mesh) {
@@ -2427,7 +2611,22 @@ $(document).ready(function () {
                 mesh.material.depthTest = true;
             }
         });
-        let dummyColor = {
+
+        //newSurfFolder.add(mesh.material,'depthWrite').name('depthWrite').listen();
+        //newSurfFolder.add(mesh.material,'depthTest').name('depthTest').listen();
+
+        // Add skins controller
+        let skinTypes = Object.keys( mesh.userData['overlays'] );
+        let skinObj = {
+            'overlay': 'default'
+        };
+        let skinController = newSurfFolder.add(skinObj,'overlay', skinTypes).name('Overlays');
+        skinController.onChange(function(val) {
+            updateMeshOverlay(mesh,val);
+        })
+
+        // Color controller
+        /*let dummyColor = {
             color: "#" + mesh.material.color.getHexString()
         };
         let colorChanger = newSurfFolder.addColor(dummyColor, 'color').name('Color');
@@ -2435,12 +2634,9 @@ $(document).ready(function () {
         colorChanger.onChange(function (colorVal) {
             let newColor = colorVal.replace('#', '0x');
             mesh.material.color.setHex(newColor);
-        });
+        });*/
 
-        //newSurfFolder.add(mesh.material,'depthWrite').name('depthWrite').listen();
-        //newSurfFolder.add(mesh.material,'depthTest').name('depthTest').listen();
-
-        return surfFolder;
+        return newSurfFolder;
     }
 
 
@@ -2594,6 +2790,8 @@ $(document).ready(function () {
                     init3DScene();
                 }
                 parseVolume(i, e.target.files);
+            } else if (sc.dtypes['overlay']['extensions'].indexOf(_fext) >= 0) {
+                parseOverlay(i, e.target.files);
             } else {
                 alert('Unknown file type!');
             }

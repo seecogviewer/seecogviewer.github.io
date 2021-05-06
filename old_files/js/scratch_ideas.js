@@ -835,3 +835,98 @@ current_filters.forEach(function(f) {
 
 
 rows = elecTable.obj.getRows()
+
+//#region Working with overlays
+
+
+//#region Update overlay availability
+// Set some variables
+let mesh = '<mesh_object>';
+let overlayname = '<new_overlay_name>';
+let newoverlay = '<new overlay obj>';
+let overlaytype = newoverlay['type'];
+let meshGui = mesh.userData['gui'];
+
+// Update available overlays
+mesh.userData['overlays'][overlayname] = newoverlay;
+let skinTypes = Object.keys( mesh.userData['overlays'] );
+let skinObj = {
+    'overlay': '<new_overlay_name>'
+};
+
+// Update gui
+meshGui.__controllers[2].remove();
+meshGui.add(skinObj,'overlay',skinTypes).name('Overlays');
+
+//#endregion
+
+//#region Change Active Overlay
+
+
+
+// If something other than default skin then add subfolder with additional options
+if (overlaytype === 'heatmap') {
+    // Add heatmap subfolder
+    let overlayFolder = meshGui.addFolder('Overlay');
+
+    // Set params for heatmap
+    let funcLut = new THREE.Lut('cooltowarm',200);
+    let odata = newoverlay.data;
+    funcLut.setMin(Math.min(...));
+    funcLut.setMax(Math.max(...newoverlay.data));
+    const verts = ['a','b','c'];
+
+    // Update the material
+    let cols = newoverlay.data.map(function(n){return funcLut.getColor(n)}); 
+    mesh.geometry.faces.forEach(function(f){
+        var jj = 0;
+        for(v of verts) {
+            f.vertexColors[jj] = ( cols[f[v]] );
+            jj++;
+        }
+    });
+    mesh.material.vertexColors = THREE.VertexColors;
+    mesh.material.needsUpdate = true;
+    mesh.geometry.colorsNeedUpdate = true;
+    mesh.geometry.elementsNeedUpdate = true;
+
+    // Add min and max controllers
+    let minSlider = overlayFolder.add(funcLut,'minV',funcLut.minV, funcLut.maxV).name('Min').listen();
+    minSlider.onChange(function(newMin){
+        let newColors = newoverlay.data.map(function(n){ return n > newMin ? funcLut.getColor(n) : new THREE.Color(0.5,0.5,0.5)});
+        mesh.geometry.faces.forEach(function(f){
+            var kk = 0;
+            for(v of verts) {
+                f.vertexColors[kk] = ( newColors[f[v]] );
+                kk++;
+            }
+        });
+        mesh.geometry.colorsNeedUpdate = true;
+        mesh.geometry.elementsNeedUpdate = true;
+    })
+    let maxSlider = overlayFolder.add(funcLut,'maxV',funcLut.minV, funcLut.maxV).name('Max').listen();
+    maxSlider.onChange(function(newMax){
+        let newColors = parsedText.data.map(function(n){ return n < newMax ? funcLut.getColor(funcLut.maxV) : funcLut.getColor(n)});
+        mesh.geometry.faces.forEach(function(f){
+            var kk = 0;
+            for(v of verts) {
+                f.vertexColors[kk] = ( newColors[f[v]] );
+                kk++;
+            }
+        });
+        obj.geometry.colorsNeedUpdate = true;
+        obj.geometry.elementsNeedUpdate = true;
+    })
+
+} else if (overlaytype === 'atlas') {
+    // Stuff for an atlas
+} else if (overlaytype === 'default') {
+    // Add nothing
+} else {
+    // Unknown type
+}
+
+
+
+
+//#endregion

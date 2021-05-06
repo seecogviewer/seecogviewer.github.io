@@ -248,7 +248,7 @@ class seecog:
     def copy_seecog_files(self):
         import os, shutil
         seecogHome = os.path.dirname(self.scriptPath)
-        seecogFiles = ['index.html','elecLegendImg.js','w3_js_scripts','style.css','external']
+        seecogFiles = ['index.html','js','external']
         for ff in seecogFiles:
             if os.path.isdir(seecogHome + os.sep + ff):
                 shutil.copytree(seecogHome + os.sep + ff,self.scDir + os.sep + ff)
@@ -271,6 +271,11 @@ class seecog:
             srcFile = os.path.join(self.subdir, 'surf', f)
             destFile = os.path.join(self.scDir, 'data', f)
             shutil.copyfile(srcFile,destFile)
+
+        t1src = os.path.join(self.subdir, 'elec_recon','T1.nii.gz')
+        t1dest = os.path.join(self.scDir, 'data', 'T1.nii.gz')
+        shutil.copyfile(t1src,t1dest)
+
 
 
 

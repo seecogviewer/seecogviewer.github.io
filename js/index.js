@@ -280,7 +280,7 @@ $(document).ready(function () {
                 {title: 'Property', field: 'field'},
                 {title: 'Shape', field: 'shape', editor: 'select', editorParams: {values: {"default": "default","cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
                 {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
-                {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3.5, "default": "default"} }},
+                {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3, "3.5": 3.5, "default": "default"} }},
                 {title: 'Active', field: 'display', formatter: "tickCross", editor: true, hozAlign: 'center', headerSort: false}
             ];
     
@@ -301,7 +301,31 @@ $(document).ready(function () {
                 columns: [
                     {title: 'Shape', field: 'shape', editor: 'select', editorParams: {values: {"cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
                     {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
-                    {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3.5, "default": "default"} }}
+                    {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3, "3.5": 3.5, "default": "default"} }},
+
+                    // Try the color picker here
+                    {
+                        titleFormatter: function() {return '<span>Color</span>';},
+                        field: 'colorpicker',
+                        formatter: function(cell,formatterParams,onRendered) {
+                            onRendered(function(){
+                                let inputel = document.getElementById('goober');
+                                let picker = new JSColor(inputel,{});
+                                //debugger;
+                                //$(cell.getElement()).children('input').value = '000000';
+                            });
+                            //let intput_element = document.createElement('INPUT');
+                            //let v = new JSColor(intput_element,{backgroundColor: '#333'})
+
+                            return "<p style='padding: 0; margin: 0; border: 0'><input id='goober'></p>";
+                            //return "<button id='goober' data-jscolor='{preset:'dark', width:250, paletteCols:15, value:'rgba(51,153,255,0.5)'}'></button>";
+
+                        },
+                        cellClick: function(e,cell) {
+                            //debugger;
+                            //$(cell.getElement()).children('input').jscolor.show();
+                        }
+                    }
                 ],
                 columnMinWidth: 60
             });
@@ -494,7 +518,7 @@ $(document).ready(function () {
             let aesColumns = [
                 {title: 'Shape', field: 'shape', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change","default": "default","cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
                 {title: 'Color', field: 'color', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", "default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
-                {title: 'Size', field: 'size', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", "default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3.5, "default": "default"} }},
+                {title: 'Size', field: 'size', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", "default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3, "3.5": 3.5, "default": "default"} }},
             ];
             let aesRow = [{shape: 'No Change', color: 'No Change', size: 'No Change'}];
             let aesTable = new Tabulator('#selectedEditorDialog-aes', {
@@ -852,6 +876,12 @@ $(document).ready(function () {
                         label: "Select All",
                         action: function(e,group) {
                             group.getRows().forEach(function(r) {r.select();})
+                        }
+                    },
+                    {
+                        label: "Unselect All",
+                        action: function(e,group) {
+                            group.getRows().forEach(function(r) {r.deselect();})
                         }
                     },
                     {

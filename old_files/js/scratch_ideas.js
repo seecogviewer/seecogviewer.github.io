@@ -872,7 +872,7 @@ if (overlaytype === 'heatmap') {
     // Set params for heatmap
     let funcLut = new THREE.Lut('cooltowarm',200);
     let odata = newoverlay.data;
-    funcLut.setMin(Math.min(...));
+    funcLut.setMin(Math.min(...newoverlay.data));
     funcLut.setMax(Math.max(...newoverlay.data));
     const verts = ['a','b','c'];
 

@@ -1,19 +1,51 @@
 function elecs2seecog(cfg, outfile)
-% imgdir = '/Users/sportsnoah14/Documents/Northshore_Hosptial/HBML/PROJECTS/ns171_visloc/B17/AvgRef';
-% ns171_all = ielvisImport('NS171');
-% ns171 = ns171_all.table;
-% 
-% 
+% Script to create an electrodes.json file that can be imported into
+% seecog
+%
+% Arguments
+%   cfg - A struct with options for input
+%       
+%       subid    -  The subject id for each contact as a cell array. If all electrodes are
+%                        from the same subject then it can be entered as a char array
+%
+%       coords  -   Nx3 matrix of coordinates for each electrode
+%
+%       elecid   -   Nx1 cell array with the name of each electrode
+%
+%       anat     -   Nx1 cell array with anatomical location (optional)
+%
+%       soz      -    Nx1 categorical, numeric or logical array if electrodes
+%                         is soz channel. If categorical array then 'undefined'
+%                         can be passed in (optional)
+%
+%       spikey  -    Nx1 categorical, numeric or logical array if electrodes
+%                         is spikey channel. If categorical array then 'undefined'
+%                         can be passed in (optional)
+%
+%       PICS     -    Nx1 cell array containing the file path to images
+%                         wished to be displayed within seecog. (optional)
+%
+%   outputfile - Where to store and what to name the output file
+%
+% Examples
+%
+% # Using the electrodes table stored in HBML_DATA.mat
+% load('HBML_DATA.mat')
+% subid = 'NS085';
+% mysub = HBML_DATA( strcmp(HBML_DATA.SubID, subid), :);
+% imgdir = 'VisLocOutput/AvgRef';
 % cfg = [];
-% cfg.subid = 'NS171';
-% cfg.coords = ns171.LEPTO;
-% cfg.elecid = ns171.Contact;
+% cfg.subid = subid;
+% cfg.coords = mysub.LEPTO;
+% cfg.elecid = mysub.Contact;
 % Go through images
 % mypics = cell(length(cfg.elecid),1);
 % for ii = 1:length(mypics)
 %     mypics{ii} = fullfile(imgdir, [cfg.elecid{ii} '_power_bystimtype.jpeg']);
 % end
 % cfg.PICS = mypics;
+% outfile = [subid '_electrodes.json'];
+% elecs2seecog(cfg, outfile)
 
 coords = cfg.coords;
 elecid = cfg.elecid;
@@ -30,12 +62,30 @@ else
     subid = cfg.subid;
 end
 
-% Spikey and soz
-if ~isfield(cfg,'soz'); soz = zeros(nelecs,1); end
-if ~isfield(cfg,'spikey'); spikey = zeros(nelecs,1); end
+% soz
+if ~isfield(cfg,'soz')
+    soz = zeros(nelecs,1);
+else
+    soz = cfg.soz;
+    if iscategorical(soz)
+        undefinedcells = isundefined(soz);
+        soz(undefinedcells) = 0;
+    end
+end
+
+% spikey
+if ~isfield(cfg,'spikey')
+    spikey = zeros(nelecs,1);
+else
+    spikey = cfg.spikey;
+    if iscategorical(spikey)
+        undefinedcells = isundefined(spikey);
+        spikey(undefinedcells) = 0;
+    end
+end
 
 % Anat
-if ~isfield(cfg,'anat'); anat = repmat('unknown',nelecs,1); end
+if ~isfield(cfg,'anat'); anat = repmat('unknown',nelecs,1); else; anat = cfg.anat; end
 
 % Pictures
 if isfield(cfg,'PICS')
@@ -63,6 +113,9 @@ json_table = table(subid,elecid,coords,soz,spikey,anat,PICS);
 json_table_string = jsonencode(json_table);
 
 % Write out
+if ~endsWith(outfile,'.json')
+    outfile = [outfile '.json'];
+end
 fid = fopen(outfile,'w');
 fprintf(fid,json_table_string);
 fclose(fid);

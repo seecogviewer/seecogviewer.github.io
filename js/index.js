@@ -125,7 +125,7 @@ $(document).ready(function () {
 
     //#region Aesthetics: Displaying Electrodes
     aes = {
-        default: {shape: "sphere", color: "black",size: 2}, //aesDefaults,
+        default: {shape: "sphere", color: "#000000",size: 2}, //aesDefaults,
         elecTextVisible: true, // Whether to show elec name hovering over elec in scenes
         // Custom aesthetic settings
         custom: [
@@ -156,12 +156,12 @@ $(document).ready(function () {
             },
             {
                 criteria: [{field: "soz", type: "=",value: true}],
-                outcome: {color: "red", size: 3},
+                outcome: {color: "#ff0000", size: 3},
                 display: true
             },
             {
                 criteria: [{field: "spikey", type: "=",value: true}],
-                outcome: {color: "green", size: 3},
+                outcome: {color: "#00ff00", size: 3},
                 display: true
             }
         ],
@@ -280,6 +280,27 @@ $(document).ready(function () {
                 {title: 'Property', field: 'field'},
                 {title: 'Shape', field: 'shape', editor: 'select', editorParams: {values: {"default": "default","cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
                 {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                
+                // Try the color picker here
+                // TODO: How to specify "Default" as an option
+                /*{
+                    titleFormatter: function() {return '<span>Color</span>';},
+                    field: 'color',
+                    formatter: function(cell,formatterParams,onRendered) {
+
+                        onRendered(function(){
+                            
+                            let picker = new JSColor(document.getElementById('goober2'),{
+                                'value': cell.getValue(),
+                                'onChange': function() {
+                                    let newcolor = document.getElementById('goober2').getAttribute('data-current-color');
+                                    cell.getRow().update({'color': newcolor});
+                                }
+                            });
+                        });
+                        return "<p style='padding: 0; margin: 0; border: 0'><input id='goober2'></p>";
+                    }
+                },*/
                 {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3, "3.5": 3.5, "default": "default"} }},
                 {title: 'Active', field: 'display', formatter: "tickCross", editor: true, hozAlign: 'center', headerSort: false}
             ];
@@ -294,42 +315,86 @@ $(document).ready(function () {
             this.tmpEditor['custom'] = editorTable;
 
             // Create mini default table
-            let editorTableDefault = new Tabulator('#editorTable-default', {
+            var editorTableDefault;
+            editorTableDefault = new Tabulator('#editorTable-default', {
                 data: [defaultSettings],
                 index: 'field',
                 layout:"fitColumns",
                 columns: [
                     {title: 'Shape', field: 'shape', editor: 'select', editorParams: {values: {"cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
-                    {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                    //{title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                    // {
+                    //     title: 'Color', field: 'color', editable: true,
+                    //     formatter: 'color',
+                    //     editor: function(cell,onRendered,success,cancel) {
+                    //         var inputel, picker;
+                    //         /*picker = new JSColor(inputel,{
+                    //             value: cell.getValue(),
+                    //             hash: true,
+                    //             onChange: function() {
+                    //                 //debugger;
+                    //                 success(this.valueElement.getAttribute('data-current-color'));
+                    //             }
+                    //         });*/
+
+                    //         function onChange(){
+                    //             success(document.getElementById('goober').getAttribute('data-current-color'));
+                    //         }
+
+                    //         //inputel.addEventListener("blur", onChange);
+
+                    //         onRendered(function(){
+                    //             inputel = document.createElement('INPUT');
+                    //             picker = new JSColor(inputel,{
+                    //                 value: cell.getValue(),
+                    //                 hash: true,
+                    //                 onChange: function() {
+                    //                     //debugger;
+                    //                     success(this.valueElement.getAttribute('data-current-color'));
+                    //                 }
+                    //             });
+                    //             //picker.value = cell.getValue();
+                    //             picker.show();
+                    //         });
+                    //         return inputel;
+                    //     }
+                    // },
                     {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3, "3.5": 3.5, "default": "default"} }},
 
                     // Try the color picker here
                     {
                         titleFormatter: function() {return '<span>Color</span>';},
-                        field: 'colorpicker',
+                        field: 'color',
                         formatter: function(cell,formatterParams,onRendered) {
+
                             onRendered(function(){
-                                let inputel = document.getElementById('goober');
-                                let picker = new JSColor(inputel,{});
-                                //debugger;
-                                //$(cell.getElement()).children('input').value = '000000';
+                                
+                                var picker = new JSColor(document.getElementById('goober'),{
+                                    //'value': cell.getValue(),
+                                    //'value': '#' + new THREE.Color(cell.getValue()).getHexString(),
+                                    'value': cell.getValue(),
+                                    'onChange': function() {
+                                        let newcolor = document.getElementById('goober').getAttribute('data-current-color');
+                                        //debugger;
+                                        cell.getRow().update({'color': newcolor});
+                                    },
+                                    'closeButton': true,
+                                });
+                                $('.jscolor-btn-close').children('span').html('Default');
                             });
-                            //let intput_element = document.createElement('INPUT');
-                            //let v = new JSColor(intput_element,{backgroundColor: '#333'})
-
                             return "<p style='padding: 0; margin: 0; border: 0'><input id='goober'></p>";
-                            //return "<button id='goober' data-jscolor='{preset:'dark', width:250, paletteCols:15, value:'rgba(51,153,255,0.5)'}'></button>";
-
-                        },
-                        cellClick: function(e,cell) {
-                            //debugger;
-                            //$(cell.getElement()).children('input').jscolor.show();
                         }
                     }
                 ],
                 columnMinWidth: 60
             });
             this.tmpEditor['default'] = editorTableDefault;
+            // $('.jscolor-btn-close').mousedown(
+            //     function(){ 
+            //         this.onmousedown();
+            //         console.log('yay!');
+            //     }
+            // )
     
         },
         validateEditorDialog: function() {
@@ -514,10 +579,16 @@ $(document).ready(function () {
         tmpSelectedEditor: {'aes': null, 'properties': null},
         selectedUpdatorDialog: function() {
 
+            // Options for colors
+            let opts = ["No Change","default",'red','blue','orange','green','yellow','black','purple','aquamarine','chocolate','darkred','deeppink','dodgerblue','fuscia','coral','maroon','magenta','violet','lime','gold','crimson','darkviolet','darkorange'];
+            let colordict = {};
+            for (c of opts) {colordict[c] = c}
+
             // Setup Aesthetics editor
             let aesColumns = [
                 {title: 'Shape', field: 'shape', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change","default": "default","cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
-                {title: 'Color', field: 'color', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", "default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                //{title: 'Color', field: 'color', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", "default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                {title: 'Color', field: 'color', headerSort: false, editor: 'select', editorParams: {values: colordict }},
                 {title: 'Size', field: 'size', headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", "default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3, "3.5": 3.5, "default": "default"} }},
             ];
             let aesRow = [{shape: 'No Change', color: 'No Change', size: 'No Change'}];

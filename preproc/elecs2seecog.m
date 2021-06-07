@@ -12,6 +12,9 @@ function elecs2seecog(cfg, outfile)
 %
 %       elecid   -   Nx1 cell array with the name of each electrode
 %
+%       gridid   -   Nx1 cell array. Name of the group the electrode
+%                        belongs to
+%
 %       anat     -   Nx1 cell array with anatomical location (optional)
 %
 %       soz      -    Nx1 categorical, numeric or logical array if electrodes
@@ -87,6 +90,18 @@ end
 % Anat
 if ~isfield(cfg,'anat'); anat = repmat('unknown',nelecs,1); else; anat = cfg.anat; end
 
+% Group ID
+if ~isfield(cfg,'gridid')
+    reg_str = '(?<array>[A-Za-z]*)(?<num>\d+)';
+    gridid = cell(nelecs,1);
+    for gii = 1:nelecs
+        id = regexp( elecid{gii}, reg_str, 'names');
+        gridid{gii} = id.array;
+    end
+else
+    gridid = cfg.gridid;
+end
+
 % Pictures
 if isfield(cfg,'PICS')
     encoder = org.apache.commons.codec.binary.Base64;
@@ -109,7 +124,7 @@ if isfield(cfg,'PICS')
 end
 
 % Create json table and encode as a json string
-json_table = table(subid,elecid,coords,soz,spikey,anat,PICS);
+json_table = table(subid,elecid,gridid,coords,soz,spikey,anat,PICS);
 json_table_string = jsonencode(json_table);
 
 % Write out

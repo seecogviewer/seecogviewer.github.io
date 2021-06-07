@@ -279,13 +279,22 @@ $(document).ready(function () {
             let dialogColumns = [
                 {title: 'Property', field: 'field'},
                 {title: 'Shape', field: 'shape', editor: 'select', editorParams: {values: {"default": "default","cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
-                {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                //{title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
                 
                 // Try the color picker here
                 // TODO: How to specify "Default" as an option
-                /*{
+                // Possibly best way: Make "Close" button into a "Default" button by adding an additional callback for when the button is clicked
+                //  Try something like this:
+                // $('.jscolor-btn-close').mousedown(
+                //     function(){ 
+                //         this.onmousedown();
+                //         console.log('yay!');
+                //     }
+                // )
+                {
                     titleFormatter: function() {return '<span>Color</span>';},
                     field: 'color',
+                    // editor:"select", editorParams:{values:{"default":"default", "custom": "custom"}},
                     formatter: function(cell,formatterParams,onRendered) {
 
                         onRendered(function(){
@@ -295,12 +304,15 @@ $(document).ready(function () {
                                 'onChange': function() {
                                     let newcolor = document.getElementById('goober2').getAttribute('data-current-color');
                                     cell.getRow().update({'color': newcolor});
-                                }
+                                    debugger;
+                                },
+                                'closeButton': true,
+                                'closeText': 'Default'
                             });
                         });
                         return "<p style='padding: 0; margin: 0; border: 0'><input id='goober2'></p>";
                     }
-                },*/
+                },
                 {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3, "3.5": 3.5, "default": "default"} }},
                 {title: 'Active', field: 'display', formatter: "tickCross", editor: true, hozAlign: 'center', headerSort: false}
             ];
@@ -389,12 +401,6 @@ $(document).ready(function () {
                 columnMinWidth: 60
             });
             this.tmpEditor['default'] = editorTableDefault;
-            // $('.jscolor-btn-close').mousedown(
-            //     function(){ 
-            //         this.onmousedown();
-            //         console.log('yay!');
-            //     }
-            // )
     
         },
         validateEditorDialog: function() {

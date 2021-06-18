@@ -156,7 +156,7 @@ $(document).ready(function () {
             let dialogColumns = [
                 {title: 'Property', field: 'field'},
                 {title: 'Shape', field: 'shape', editor: 'select', editorParams: {values: {"default": "default","cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
-                //{title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
                 
                 // Try the color picker here
                 // TODO: How to specify "Default" as an option
@@ -168,7 +168,7 @@ $(document).ready(function () {
                 //         console.log('yay!');
                 //     }
                 // )
-                {
+                /*{
                     titleFormatter: function() {return '<span>Color</span>';},
                     field: 'color',
                     // editor:"select", editorParams:{values:{"default":"default", "custom": "custom"}},
@@ -189,7 +189,7 @@ $(document).ready(function () {
                         });
                         return "<p style='padding: 0; margin: 0; border: 0'><input id='goober2'></p>";
                     }
-                },
+                },*/
                 {title: 'Size', field: 'size', editor: 'select', editorParams: {values: {"default": "default", "1": 1, "1.5": 1.5, "2": 2, "2.5": 2.5, "3": 3, "3.5": 3.5, "default": "default"} }},
                 {title: 'Active', field: 'display', formatter: "tickCross", editor: true, hozAlign: 'center', headerSort: false}
             ];

@@ -76,6 +76,8 @@ $(document).ready(function () {
                 let tableData = [];
 
                 // Go through each row
+                //let random_subid = Math.random().toString(36).substring(7).toUpperCase();
+                let random_subid = 'sub001';
                 const tLength = parsedData.length;
                 for (ii=1;ii<tLength;ii++) {
                     if (parsedData[ii].length == 0) {continue;}
@@ -87,9 +89,17 @@ $(document).ready(function () {
                         rowData[colNames[cii]] = rawRow[cii];
                     }
 
+                    // Include subject ID
+                    if ( !rowData.hasOwnProperty('subid') ) {
+                        rowData['subid'] = random_subid;
+                    }
+
                     // Add gridid
                     let elecid = rowData['elecid'];
                     rowData['gridid'] = elecid.replace(/\d+/,"");
+
+                    // Create the "full name"
+                    rowData['fullname'] = rowData['subid'] + '-' + rowData['elecid'];
 
                     // Add coords
                     rowData["coords"] = [].concat(
@@ -327,7 +337,7 @@ $(document).ready(function () {
                 };
                 for (plane in orients) {
                     vol[`${plane}`] = orients[plane]['obj'];
-                    orients[plane]['obj'].name = plane;
+                    orients[plane]['obj'].name = files[idx].name; //plane;
                     orients[plane]['obj'].border.color = orients[plane]['color'];
                     orients[plane]['obj'].children[0].visible = false;
                     orients[plane]['obj'].orientation = orients[plane]['ori'];

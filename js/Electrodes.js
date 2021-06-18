@@ -2,7 +2,8 @@
 function Electrode(elecData) {
     const data = elecData.getData();
     this.row = elecData;
-    this.name = data['elecid'];
+    this.name = data['fullname'];
+    this.elecid = data['elecid'];
     this.color = data['color'];
     this.size = data['size'];
     this.shape = data['shape'];
@@ -53,7 +54,7 @@ function Electrode(elecData) {
         this.threeObj.add(this._Mesh);
     };
     this.createTextMesh = function () {
-        const geom = new THREE.TextBufferGeometry(this.name, {
+        const geom = new THREE.TextBufferGeometry(this.elecid, {
             font: sc.font,
             size: this._textSize,
             height: 0.1
@@ -152,6 +153,13 @@ function Electrode(elecData) {
         this.img = null;
         this.row.update({"scObj": this});*/
         //document.getElementById(this.name + '-img').remove();
+        if (this.img !== null) {
+            this.img.remove();
+            if (imgHolder._slideShowEnabled) {
+                imgHolder.nextSlide(-1);
+            }
+        }
+        this.img = null;
         this.row.update({"scObj": this});
     };
     this.snap2surf = function(meshname) {
@@ -205,4 +213,61 @@ function Electrode(elecData) {
         }*/
         this.row.update({"scObj": this});
     };
+
+    // Method to display electrode (JUST STARTED)
+    this.show = function(threed=true,staticImg=true) {
+        
+        // Create 3D Mesh
+        if (threed && this.threeObj === null) {
+            this.init(threed,staticImg);
+        }
+
+        // Add Mesh to Scene
+        if (sc.elecScene.getObjectByName(this.name) === undefined) {
+            sc.elecScene.add(this.threeObj);
+        } else {
+            scObj.update();
+        }
+
+        // Create Static Image
+        if (staticImg && this.img === null && this.row.getData()['PICS'] !== "") {
+            let imgDOM = imgHolder.appendImg(this.row.getData()['PICS'],this.name + '-img');
+            
+            let elecparent = this;
+            //elecImg.onclick = function (event) {
+            imgDOM.onclick = function (event) {
+                if (event.shiftKey) {
+                    elecparent.hide();
+                    elecparent.row.update({'img': null});
+                }
+            }
+            this.img = imgDOM;
+        }
+
+        this.row.update({'isVisible': true});
+    };
+
+    // Method to hide electrode
+    this.hide = function () {
+        if (this.threeObj !== null || this.img !== null) {
+            this.destroyObj();
+
+            /*if (this.img !== null) {
+                this.img.remove();
+                if (imgHolder._slideShowEnabled) {
+                    imgHolder.nextSlide(-1);
+                }
+            }*/
+        }
+
+        // If object is visible in static image scene, delete it
+        if (this.img !== null) {
+            this.destroyImg();
+        }
+
+        this.row.update({
+            'isVisible': false
+        });
+    }
+
 }

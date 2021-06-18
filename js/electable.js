@@ -1,6 +1,143 @@
 var electable;
 
 $(document).ready(function () {
+    
+    // Prototype eyeball column 1
+    let eyeball_column1 = {
+        formatter: function (cell, formatterParams, onRendered) {
+            onRendered(function () {
+                if (cell.getRow().getData()['isVisible'] === true) {
+                    //return "<i class=''></i>";
+                    $(cell.getElement()).children('i').addClass('fa fa-eye');
+                } else {
+                    //return "<i class='fa fa-eye'></i>";
+                    $(cell.getElement()).children('i').removeClass('fa fa-eye');
+                }
+            });
+            return "<i class=''></i>";
+        },
+        titleFormatter: function () {
+            return "<i class='fa fa-eye'></i>";
+        },
+        width: 50,
+        frozen: true,
+        headerSort: false,
+        headerMenu: [{
+                label: 'Show All',
+                action: function (e, column) {
+                    console.log('Showing all elecs!');
+                    let groupsOpen = [];
+                    e.preventDefault();
+                    /*elecTable.obj.getGroups().forEach(function(g) {
+                        const gIsVisible = g.isVisible();
+                        g.show();
+                        for (row of g.getRows()) {
+                            let notShown = row.getData().scObj.threeObj === null;
+                            if (notShown) {
+                                elecTable.displayElec(row);
+                            }
+                        }
+                        if (!gIsVisible) {
+                            g.hide();
+                        }
+                    });*/
+                    elecTable.obj.getRows().forEach(function (row) {
+                        if (row.getData()['isVisible'] === false) {
+                            elecTable.displayElec(row);
+                            if (row.getCells().length !== 0) {
+                                let cell = row.getCells()[0];
+                                $(cell.getElement()).children('i').addClass('fa fa-eye');
+                            }
+                        }
+                    });
+                }
+            },
+            {
+                label: 'Remove All',
+                action: function (e, column) {
+                    console.log('Removing all elecs!');
+                    let groupsOpen = [];
+                    e.preventDefault();
+                    elecTable.obj.getRows().forEach(function (row) {
+                        if (row.getData()['isVisible'] === true) {
+                            elecTable.removeElec(row);
+                            if (row.getCells().length !== 0) {
+                                let cell = row.getCells()[0];
+                                $(cell.getElement()).children('i').removeClass('fa fa-eye');
+                            }
+                        }
+                    });
+                }
+            },
+        ],
+        cellClick: function (e, cell) {
+            //let isShown3D = cell.getData().scObj.threeObj !== null;
+            //const isShownImg = cell.getData().scObj.img !== null;
+            let isShown = cell.getRow().getData()['isVisible'];
+            let row = cell.getRow();
+            if (!isShown) {
+                $(cell.getElement()).children('i').addClass('fa fa-eye');
+                elecTable.displayElec(row);
+            } else {
+                $(cell.getElement()).children('i').removeClass('fa fa-eye');
+                elecTable.removeElec(row);
+            }
+        }
+    };
+
+    // Eyeball column prototype 2
+    let eyeball_column2 = {
+        titleFormatter: function () {
+            return "<i class='fa fa-eye'></i>";
+        },
+        field: 'isVisible',
+        width: 50,
+        frozen: true,
+        headerSort: false,
+        formatter: "tickCross",
+        formatterParams: {
+            allowEmpty: false,
+            allowTruthy: false,
+            tickElement: "<i class='fa fa-eye'></i>",
+            crossElement: "<i class='fa'></i>",
+        },
+        cellClick: function(e,cell) {
+            cell.setValue( !cell.getValue() )
+            if (cell.getValue()) {
+                cell.getRow().getData()['scObj'].show(threed=true,staticImg=true);
+            } else {
+                cell.getRow().getData()['scObj'].hide();
+            }
+        },
+        headerMenu: [{
+                label: 'Show All',
+                action: function (e, column) {
+                    console.log('Showing all elecs!');
+                    let groupsOpen = [];
+                    e.preventDefault();
+                    elecTable.obj.getRows().forEach(function (row) {
+                        if (row.getData()['isVisible'] === false) {
+                            row.getData()['scObj'].show(threed=true,staticImg=true);
+                        }
+                    });
+                }
+            },
+            {
+                label: 'Remove All',
+                action: function (e, column) {
+                    console.log('Removing all elecs!');
+                    let groupsOpen = [];
+                    e.preventDefault();
+                    elecTable.obj.getRows().forEach(function (row) {
+                        if (row.getData()['isVisible'] === true) {
+                            row.getData()['scObj'].hide();
+                        }
+                    });
+                }
+            },
+        ],
+    };
+    
     //#region elecTable object and associated buttons
 
     // Function for checking if cells can be edited or not on click
@@ -10,11 +147,26 @@ $(document).ready(function () {
         }
     }
 
+    // Recursively go through electable and select rows, not groups
+    function recurseRowSelect(e,group) {
+        let groupRows = group.getRows();
+        if (groupRows.length === 0) {
+            let subgroups = group.getSubGroups();
+            for (grp of subgroups) {
+                recurseRowSelect('e',grp);
+            }
+        } else {
+            for (r of groupRows) {
+                r.select();
+            }
+        }
+    }
+
     // The primary elecTable object
     elecTable = {
         obj: null,
         domID: "elecTableChild",
-        groupBy: ['gridid'],
+        groupBy: ['subid','gridid'],
         filters: [],
         filter_table: null,
         tmpColumnUpdate: null,
@@ -49,7 +201,7 @@ $(document).ready(function () {
             let columnDefs = elecTable.obj.getColumnDefinitions().slice(2);
             
             for (c of columnDefs) {
-                if (c.field === 'anat' || c.field === 'gridid') { continue;}                
+                if (c.field === 'anat' || c.field === 'gridid' || c.field === 'subid' || c.field === 'fullname') { continue;}                
                 let newProp = {'title': c.title, 'field': c.field, headerSort: false, editor: 'select', editorParams: {values: {"No Change": "No Change", true: true, false: false} }};
                 propColumns.push(newProp);
                 propRow[`${c.field}`] = "No Change";
@@ -108,98 +260,9 @@ $(document).ready(function () {
 
         },
         elecTableColumns: [
+            eyeball_column2,
             {
-                //formatter: function() {return "<i class=''></i>";},
-                /*formatter: function(cell, formatterParams, onRendered){
-                    onRendered(function() {
-                        if (cell.getRow().getData().scObj.threeObj === null) {
-                            return "<i class=''></i>";
-                        } else {
-                            return "<i class='fa fa-eye'></i>";
-                        }
-                    });
-                },*/
-                formatter: function(cell,formatterParams,onRendered) {
-                    onRendered(function(){
-                        if (cell.getRow().getData()['isVisible'] === true) {
-                            //return "<i class=''></i>";
-                            $(cell.getElement()).children('i').addClass('fa fa-eye');
-                        } else {
-                            //return "<i class='fa fa-eye'></i>";
-                            $(cell.getElement()).children('i').removeClass('fa fa-eye');
-                        }
-                    });
-                    return "<i class=''></i>";
-                },
-                titleFormatter: function() {return "<i class='fa fa-eye'></i>";},
-                width: 50,
-                frozen: true,
-                headerSort:false,
-                headerMenu: [
-                    {
-                        label: 'Show All',
-                        action: function(e,column) {
-                            console.log('Showing all elecs!');
-                            let groupsOpen = [];
-                            e.preventDefault();
-                            /*elecTable.obj.getGroups().forEach(function(g) {
-                                const gIsVisible = g.isVisible();
-                                g.show();
-                                for (row of g.getRows()) {
-                                    let notShown = row.getData().scObj.threeObj === null;
-                                    if (notShown) {
-                                        elecTable.displayElec(row);
-                                    }
-                                }
-                                if (!gIsVisible) {
-                                    g.hide();
-                                }
-                            });*/
-                            elecTable.obj.getRows().forEach(function(row) {
-                                if (row.getData()['isVisible'] === false) {
-                                    elecTable.displayElec(row);
-                                    if (row.getCells().length !== 0) {
-                                        let cell = row.getCells()[0];
-                                        $(cell.getElement()).children('i').addClass('fa fa-eye');
-                                    }
-                                }
-                            });
-                        }
-                    },
-                    {
-                        label: 'Remove All',
-                        action: function(e,column) {
-                            console.log('Removing all elecs!');
-                            let groupsOpen = [];
-                            e.preventDefault();
-                            elecTable.obj.getRows().forEach(function(row) {
-                                if (row.getData()['isVisible'] === true) {
-                                    elecTable.removeElec(row);
-                                    if (row.getCells().length !== 0) {
-                                        let cell = row.getCells()[0];
-                                        $(cell.getElement()).children('i').removeClass('fa fa-eye');
-                                    }
-                                }
-                            });
-                        }
-                    },
-                ],
-                cellClick: function(e,cell){
-                    //let isShown3D = cell.getData().scObj.threeObj !== null;
-                    //const isShownImg = cell.getData().scObj.img !== null;
-                    let isShown = cell.getRow().getData()['isVisible'];
-                    let row = cell.getRow();
-                    if (!isShown) {
-                        $(cell.getElement()).children('i').addClass('fa fa-eye');
-                        elecTable.displayElec(row);
-                    } else {
-                        $(cell.getElement()).children('i').removeClass('fa fa-eye');
-                        elecTable.removeElec(row);
-                    }
-                }
-            },
-            {
-                title: "elecID",
+                title: "Label",
                 field: "elecid",
                 visible: true,
                 headerFilter: "input",
@@ -216,8 +279,20 @@ $(document).ready(function () {
                 frozen: true,
             },
             {
+                title: 'Subject',
+                field: 'subid',
+                visible: false,
+                editable: false
+            },
+            {
                 title: 'gridID',
                 field: 'gridid',
+                visible: false,
+                editable: false
+            },
+            {
+                title: 'FullID',
+                field: 'fullname',
                 visible: false,
                 editable: false
             },
@@ -377,7 +452,8 @@ $(document).ready(function () {
                 placeholder: "Waiting for electrode json file",
                 data: inputData,
                 layout: "fitData",
-                index: "elecid",
+                index: "fullname",
+                //index: "elecid",
                 //height: "100%",
                 resizableColumns: true,
                 movableColumns: true,
@@ -387,9 +463,10 @@ $(document).ready(function () {
                 groupContextMenu: [
                     {
                         label: "Select All",
-                        action: function(e,group) {
+                        /*action: function(e,group) {
                             group.getRows().forEach(function(r) {r.select();})
-                        }
+                        }*/
+                        action: recurseRowSelect
                     },
                     {
                         label: "Unselect All",
@@ -431,7 +508,7 @@ $(document).ready(function () {
                     })
                 },
                 groupBy: this.groupBy,
-                groupStartOpen: [false],
+                groupStartOpen: [false,false],
                 columns: this.elecTableColumns
             });
             t = this.setupAesthetics(t);
@@ -456,6 +533,14 @@ $(document).ready(function () {
             if (!elecData.hasOwnProperty('anat')) {
                 elecData['anat'] = 'Unknown';
             }
+
+            // Include subject ID
+            if ( !elecData.hasOwnProperty('subid') ) {
+                elecData['subid'] = 'sub001';
+            }
+
+            // Create the "full name"
+            elecData['fullname'] = elecData['subid'] + '-' + elecData['elecid'];
 
             // Add aesthetic fields
             const aesFields = ['shape', 'color', 'size'];
@@ -495,8 +580,9 @@ $(document).ready(function () {
         },
         displayElec: function(elecData,threed=true,staticImg=true) {
             let scObj = elecData.getData()['scObj'];
-            let rowID = elecData.getData()['elecid'];
-            let eyeCell = elecData.getCells()[0];
+            //let rowID = elecData.getData()['elecid'];
+            let rowID = elecData.getData()['fullname'];
+            //let eyeCell = elecData.getCells()[0];
             /*if (eyeCell === undefined) {
                 debugger;
             }*/
@@ -513,7 +599,7 @@ $(document).ready(function () {
                 }
             }
             if (staticImg && scObj.img === null && elecData.getData()['PICS'] !== "") {
-                let imgDOM = imgHolder.appendImg(elecData.getData()['PICS'],elecData.getData()['elecid'] + '-img');
+                let imgDOM = imgHolder.appendImg(elecData.getData()['PICS'],rowID + '-img');
                 
                 //elecImg.onclick = function (event) {
                 imgDOM.onclick = function (event) {
@@ -535,8 +621,8 @@ $(document).ready(function () {
         },
         removeElec: function(elecData) {
             let scObj = elecData.getData()['scObj'];
-            let rowID = elecData.getData()['elecid'];
-            let imgDOM = document.getElementById(elecData.getData()['elecid'] + '-img');
+            let rowID = elecData.getData()['fullname'];
+            let imgDOM = document.getElementById(rowID + '-img');
             const threeDVisible = document.getElementById("scenesArea").style.display !== "none";
             let eyeCell = elecData.getCells()[0];
             // If object is visible in 3D scene, remove it

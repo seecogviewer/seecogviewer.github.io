@@ -4,6 +4,7 @@ $(document).ready(function () {
     aes = {
         default: {shape: "sphere", color: "#000000",size: 2}, //aesDefaults,
         elecTextVisible: true, // Whether to show elec name hovering over elec in scenes
+        showSelectedElecs: false, // Whether or not elecs selected in table and 3D scene are reflected in another
         // Custom aesthetic settings
         custom: [
             {
@@ -330,6 +331,16 @@ $(document).ready(function () {
             console.log('Closed!');
         }
     });
+
+    //#endregion
+
+
+    //#region Single Property Editor Dialogue
+
+    
+
+
+
 
     //#endregion
 });

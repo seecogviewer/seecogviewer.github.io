@@ -4,3 +4,5 @@ sample_data
 example_data/
 example_data/*
 ._*
+*.pyc
+__pycache__/*

@@ -64,6 +64,7 @@
     <script src="js/electable.js"></script>
     <script src="js/viewchanger.js"></script>
     <script src="js/imgHolder.js"></script>
+    <script src="js/raycaster.js"></script>
     <script src="js/scenery.js"></script>
     <script src="js/parsers.js"></script>
     <script src="js/index.js"></script>
@@ -207,6 +208,18 @@
     <div id="searchDialog" class='scDialog' title="Search for Electrodes">
         <button id="add-filter-bttn">Add Filter</button>
         <div id="searchEditor"></div>
+    </div>
+
+    <!--Property Changer Dialogue-->
+    <div id="propDialog" class='scDialog' title="Change Properties">
+        <label for="propDialog-search">Filter</label>
+        <br>
+        <input type="search" id="propDialog-search">
+        <br>
+        <div id="propEditor">
+            <div id="hasProp"></div>
+            <div id="nothaveProp"></div>
+        </div>
     </div>
 
 

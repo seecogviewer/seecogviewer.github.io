@@ -21,6 +21,7 @@ function Electrode(elecData) {
         this.threeObj.position.set(this.coords[0],this.coords[1],this.coords[2]);
         this.threeObj.type = "Electrode";
         this.threeObj.name = this.name;
+        this.threeObj.userData.scObj = this;
         this.createElecMesh();
         this.createTextMesh();
         this.row.update({"scObj": this});
@@ -51,6 +52,7 @@ function Electrode(elecData) {
             color: this.getColor()
         });
         this._Mesh = new THREE.Mesh(mesh, mat);
+        this._Mesh.type = "elecGeo";
         this.threeObj.add(this._Mesh);
     };
     this.createTextMesh = function () {

@@ -1,4 +1,4 @@
-var electable;
+var elecTable;
 
 $(document).ready(function () {
     
@@ -162,6 +162,15 @@ $(document).ready(function () {
         }
     }
 
+    // Header menu for editing electrodes by column
+    let propDialog_editor = [{
+        label: 'Edit',
+        action: function(event,column) {
+            event.preventDefault();
+            $("#propDialog").dialog("open");
+        }
+    }]
+
     // The primary elecTable object
     elecTable = {
         obj: null,
@@ -277,24 +286,28 @@ $(document).ready(function () {
                 },*/
                 editable: false,
                 frozen: true,
+                validator: 'string'
             },
             {
                 title: 'Subject',
                 field: 'subid',
                 visible: false,
-                editable: false
+                editable: false,
+                validator: 'string'
             },
             {
                 title: 'gridID',
                 field: 'gridid',
                 visible: false,
-                editable: false
+                editable: false,
+                validator: 'string'
             },
             {
                 title: 'FullID',
                 field: 'fullname',
                 visible: false,
-                editable: false
+                editable: false,
+                validator: 'string'
             },
             {
                 title: "SOZ",
@@ -303,6 +316,7 @@ $(document).ready(function () {
                 editable: false,
                 visible: true,
                 editor: true,
+                validator: 'unique',
                 cellClick: check2update
             },
             {
@@ -312,6 +326,7 @@ $(document).ready(function () {
                 editable: false,
                 visible: true,
                 editor: true,
+                validator: 'unique',
                 cellClick: check2update
             },
             {
@@ -319,6 +334,7 @@ $(document).ready(function () {
                 field: "anat",
                 editable: false,
                 visible: true,
+                validator: 'string',
                 headerFilter: "input"
             },
             {
@@ -328,6 +344,7 @@ $(document).ready(function () {
                 editable: false,
                 visible: true,
                 editor: true,
+                validator: 'unique',
                 cellClick: check2update
             },
             {
@@ -337,6 +354,7 @@ $(document).ready(function () {
                 editable: false,
                 visible: true,
                 editor: true,
+                validator: 'unique',
                 cellClick: check2update
             },
             {
@@ -346,6 +364,7 @@ $(document).ready(function () {
                 visible: true,
                 editable: false,
                 editor: true,
+                validator: 'unique',
                 cellClick: check2update
             },
             {
@@ -355,6 +374,7 @@ $(document).ready(function () {
                 visible: true,
                 editable: false,
                 editor: true,
+                validator: 'unique',
                 cellClick: check2update
             },
             {
@@ -364,6 +384,7 @@ $(document).ready(function () {
                 visible: true,
                 editable: false,
                 editor: true,
+                validator: 'unique',
                 cellClick: check2update
             }
         ],
@@ -936,6 +957,29 @@ $(document).ready(function () {
 
     // Update individual elecs
     $("#selectedEditorDialog").dialog({
+        resizable: true,
+        autoOpen: false,
+        width: 700,
+        height: 500,
+        modal: true,
+        buttons: {
+            "Update": function() {
+                elecTable.updateSelectedElecs();
+                //elecTable.updateColumnSettings();
+                $( this ).dialog( "close" );
+                console.log('WOOHOO! It worked!');
+            },
+            Cancel: function() {
+                $( this ).dialog( "close" );
+            }
+        },
+        close: function() {
+            console.log('Closed!');
+        }
+    });
+
+    // GUI to drag and drop elecs into different categories
+    $("#propDialog").dialog({
         resizable: true,
         autoOpen: false,
         width: 700,

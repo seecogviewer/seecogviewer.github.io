@@ -1,28 +1,33 @@
+import os
+import re
+import base64
+import json
+import nibabel as nib
+import pandas as pd
+from nibabel.freesurfer.io import read_geometry, write_geometry, read_annot
+import shutil
+import sys
+
 class seecog:
     def __init__(self,subDir):
-        import os
         self.subdir = subDir
         self.subid = os.path.basename(subDir)
         self.scriptPath = os.path.dirname(os.path.abspath(__file__))
+        self.scDir = ''
 
     def create_seecog_dir(self):
-        import os
         elecReconDir = os.path.join(self.subdir, 'elec_recon')
         self.scDir = os.path.join(elecReconDir, 'SEECOG')
         dataDir = self.scDir + os.sep + 'data'
         os.makedirs(dataDir)
 
     def import_ielvis(self):
-        import os
-        import re
-        import base64
-        from os.path import isfile, isdir, join, basename
 
         subid = self.subid
         fsDir = self.subdir
-        elecReconDir = join(fsDir,'elec_recon')
-        leptoFile = join(fsDir,'elec_recon',subid + '.LEPTO')
-        elecNamesFile = join(fsDir,'elec_recon',subid + '.electrodeNames')
+        elecReconDir = os.path.join(fsDir,'elec_recon')
+        leptoFile = os.path.join(fsDir,'elec_recon',subid + '.LEPTO')
+        elecNamesFile = os.path.join(fsDir,'elec_recon',subid + '.electrodeNames')
         elecList = []
 
         # Dictionary for each electrode
@@ -82,7 +87,7 @@ class seecog:
         f.close()
 
         # Import the static images
-        picDir = join(elecReconDir,'PICS')
+        picDir = os.path.join(elecReconDir,'PICS')
         expr = '(?P<arrayID>[A-Za-z]*)(?P<arrayNum>\d+)'
         # Loop through elecList
         for ee in range(len(elecList)):
@@ -96,7 +101,7 @@ class seecog:
             elecList[ee]['gridid'] = thisEarray
 
             # Read in image and convert to base64
-            if isfile(picURL):
+            if os.path.isfile(picURL):
                 f = open(picURL, 'rb')
                 encoded_img = base64.b64encode(f.read())
                 f.close()
@@ -107,7 +112,6 @@ class seecog:
         self.elecData = elecList
 
     def write_elecData(self):
-        import json, os
         outData = json.dumps(self.elecData)
         outFile = self.scDir + os.sep + 'data' + os.sep + 'electrodes.json'
         f = open(outFile,'w')
@@ -116,9 +120,6 @@ class seecog:
 
     # Add the anatomical location to electrode info
     def findAnat(self):
-        import nibabel as nib
-        import os
-        import pandas as pd
 
         # Files and directories
         subid = self.subid
@@ -191,8 +192,7 @@ class seecog:
         self.elecData = elecList
 
     def create_subcorts(self):
-        from nibabel.freesurfer.io import read_geometry, write_geometry
-        import os, shutil
+
         # Important filepaths
         fsDir = self.subdir
         dataDir = self.scDir + os.sep + 'data'
@@ -245,8 +245,38 @@ class seecog:
 
         shutil.rmtree(tmpDir)
 
+    def write_overlays(self):
+
+        # Set directories to reference
+        labelDir = os.path.join(self.subdir,'label')
+        outputDir = os.path.join(self.scDir,'data')
+
+        # List of dictionaries for parcellations
+        parc_list = [
+            {'source': 'lh.aparc.annot', 'output': 'lh_dk_atlas.overlay','name': 'DK Atlas'},
+            {'source': 'rh.aparc.annot', 'output': 'rh_dk_atlas.overlay', 'name': 'DK Atlas'},
+            {'source': 'lh.aparc.a2009s.annot', 'output': 'lh_d_atlas.overlay', 'name': 'D Atlas'},
+            {'source': 'rh.aparc.a2009s.annot', 'output': 'rh_d_atlas.overlay', 'name': 'D Atlas'}
+        ]
+
+        # Write out the parcellations
+        for d in parc_list:
+            labels, ctab, names = read_annot( os.path.join(labelDir,d['source']) )
+            overlay_struct = {
+                'type': 'atlas',
+                'mesh': 'lh.pial',
+                'data': [0 if val == -1 else val for val in labels.tolist()],
+                'ctable': ctab.tolist(),
+                'labels': [n.astype(str) for n in names],
+                'name': d['name']
+            }
+
+            outputTxt = json.dumps(overlay_struct)
+            outputName = os.path.join(outputDir,d['output'])
+            with open(outputName,'w') as fo:
+                fo.write(outputTxt)
+
     def copy_seecog_files(self):
-        import os, shutil
         seecogHome = os.path.dirname(self.scriptPath)
         seecogFiles = ['index.html','js','external']
         for ff in seecogFiles:
@@ -256,13 +286,13 @@ class seecog:
                 shutil.copyfile(seecogHome + os.sep + ff, self.scDir + os.sep + ff)
 
     def runAll(self):
-        import shutil, os
         # Run the basic functions
         self.import_ielvis()
         self.findAnat()
         self.create_seecog_dir()
         self.write_elecData()
         self.create_subcorts()
+        self.write_overlays()
         self.copy_seecog_files()
 
         # Add the pial and white files to the data folder
@@ -276,11 +306,7 @@ class seecog:
         t1dest = os.path.join(self.scDir, 'data', 'T1.nii.gz')
         shutil.copyfile(t1src,t1dest)
 
-
-
-
 if __name__ == '__main__':
-    import sys, os
 
     # Determine if input is full file path to freesurfer subject or just the subject ID
     subInput = sys.argv[1]

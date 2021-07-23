@@ -388,6 +388,8 @@ $(document).ready(function () {
             width: 200,
             resizable: true
         });
+        
+        // Generic Display settings
         let dispFolder = sceneGui.addFolder('Display');
         let cam = sc.scenes.threeD.camera;
         cam['reCenterCamera'] = function () {
@@ -402,6 +404,8 @@ $(document).ready(function () {
         dispFolder.add(rendColors, 'currentColor', ['White', 'Black', 'PowderBlue']).name('Background').onChange(function (newColor) {
             sc.scenes.threeD.renderer.setClearColor(newColor.toLocaleLowerCase(), 1);
         });
+        
+        // Electrodes
         let elecsFolder = sceneGui.addFolder('Electrode Settings');
         elecsFolder.add(aes,'elecTextVisible').name('Text').listen().onChange(function() {
             // Recurse through 3D scene and if the object contains elecText, toggle it
@@ -411,6 +415,9 @@ $(document).ready(function () {
                     elecText.visible = aes['elecTextVisible'];
                 }
             });
+        });
+        elecsFolder.add(aes,'showSelectedElecs').name('Display Selected').listen().onChange(function() {
+            // Nothing yet
         });
 
         // Play with controls settings
@@ -689,9 +696,8 @@ $(document).ready(function () {
         controls.update();
         sc.scenes.threeD.controls = controls;
 
-        let escene = createElecScene();
+        var escene = createElecScene();
         sc.scenes.threeD.scene.add(escene);
-
 
         // The font to be used in THREE.js scenes
         const font = new THREE.FontLoader().parse(rawText);
@@ -702,6 +708,13 @@ $(document).ready(function () {
 
         initSceneGui();
 
+        // Enable raycasting
+        pickHelper = new PickHelper();
+        window.addEventListener('mousemove', setPickPosition);
+        window.addEventListener('mouseout', clearPickPosition);
+        window.addEventListener('mouseleave', clearPickPosition);
+
+
         //Check when need to resize canvas
         function rendererSizeChecker(renderer) {
             const canvas = renderer.domElement;
@@ -709,7 +722,7 @@ $(document).ready(function () {
             const height = canvas.clientHeight;
             const needResize = canvas.width !== width || canvas.height !== height;
             if (needResize) {
-              renderer.setSize(width, height,false);
+                renderer.setSize(width, height, false);
             }
             return needResize;
         }
@@ -726,6 +739,10 @@ $(document).ready(function () {
             
             controls.update();
             light.position.copy(camera.position);
+
+            // Raycaster
+            pickHelper.pick(pickPosition, escene, camera);
+
             renderer.render(scene, camera);
 
             requestAnimationFrame(function () {

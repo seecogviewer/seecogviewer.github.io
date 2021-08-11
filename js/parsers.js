@@ -336,23 +336,27 @@ $(document).ready(function () {
                     }
                 };
                 for (plane in orients) {
+
+                    // Settings for whatever method
                     vol[`${plane}`] = orients[plane]['obj'];
                     orients[plane]['obj'].name = files[idx].name; //plane;
                     orients[plane]['obj'].border.color = orients[plane]['color'];
                     orients[plane]['obj'].children[0].visible = false;
                     orients[plane]['obj'].orientation = orients[plane]['ori'];
                     
-                    //let newScene = new THREE.Scene(); newScene.add(orients[plane]['obj']);
-                    //scenePlaneController(newScene,plane,orients[plane]['axes'],orients[plane]['pos']);
-                    //sc.scenes.threeD.scene.add(newScene);
-
-                    // Create 2D plane scene
-                    //createPlaneScene(newScene,plane,orients[plane]['dom']);
+                    // Moving the scene itself, not moving the plane
+                    // let newScene = new THREE.Scene(); 
+                    // newScene.add(orients[plane]['obj']);
+                    // scenery.scenePlaneController(newScene,plane,orients[plane]['axes'],orients[plane]['pos']);
+                    // sc.scenes.threeD.scene.add(newScene);
+                    // scenery.createPlaneScene(newScene,plane,orients[plane]['dom']);
+                    // sc.scenes.threeD.scene.add(orients[plane]['obj']);
                     
+                    // Moving the image plane, not moving the scene
                     scenery.planeController(orients[plane]['obj'], plane, orients[plane]['axes']);
                     scenery.create2DScene(orients[plane],plane);
                     sc.scenes.threeD.scene.add(sc.scenes[plane].scene);
-                    //sc.scenes.threeD.scene.add(orients[plane]['obj']);
+                    
                 }
             })
             .catch(function (error) {

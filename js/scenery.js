@@ -92,7 +92,7 @@ $(document).ready(function () {
         let parentFolder = sc.datGui.objs['vol'];
         let planeFolder = parentFolder.addFolder(name);
         //debugger;
-        planeFolder.add(obj.position, planePosition, -128, 128, 1).name('Slice').listen();
+        planeFolder.add(obj.position, planePosition, -150, 150, 1).name('Slice').listen();
         for (ax of axes) {
             planeFolder.add(obj.rotation, ax, -Math.PI/2, Math.PI/2, 0.1).name('Rotate' + ax.toUpperCase()).onChange(function (newVal) {
                 obj.rotation.set(this.object.x, this.object.y, this.object.z);
@@ -119,7 +119,7 @@ $(document).ready(function () {
 
         // Create position for line of camerapole
         let lineEnd;
-        const camDist = 200;
+        const camDist = 138;
         switch (ax) {
             case 'Sagittal':
                 lineEnd = new THREE.Vector3( camDist, 0, 0 );
@@ -139,7 +139,7 @@ $(document).ready(function () {
         points.push( new THREE.Vector3( 0, 0, 0 ) );
         let geometry = new THREE.BufferGeometry().setFromPoints( points );
         line = new THREE.Line( geometry, material );
-        line.visible = false; // Helpful in debugging cameras
+        line.visible = true; // Helpful in debugging cameras
 
         // The camera
         let camera = new AMI.OrthographicCamera(
@@ -709,10 +709,10 @@ $(document).ready(function () {
         initSceneGui();
 
         // Enable raycasting
-        pickHelper = new PickHelper();
-        window.addEventListener('mousemove', setPickPosition);
-        window.addEventListener('mouseout', clearPickPosition);
-        window.addEventListener('mouseleave', clearPickPosition);
+        // pickHelper = new PickHelper();
+        // window.addEventListener('mousemove', setPickPosition);
+        // window.addEventListener('mouseout', clearPickPosition);
+        // window.addEventListener('mouseleave', clearPickPosition);
 
 
         //Check when need to resize canvas
@@ -741,7 +741,7 @@ $(document).ready(function () {
             light.position.copy(camera.position);
 
             // Raycaster
-            pickHelper.pick(pickPosition, escene, camera);
+            //pickHelper.pick(pickPosition, escene, camera);
 
             renderer.render(scene, camera);
 

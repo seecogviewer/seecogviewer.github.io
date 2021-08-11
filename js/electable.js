@@ -547,7 +547,7 @@ $(document).ready(function () {
             for (field of neededFields) {
                 if (!elecData.hasOwnProperty(field)) {
                     elecData[field] = false;
-                } else {
+                } else if ( typeof(elecData[field]) === "string") {
                     elecData[field] = elecData[field].toUpperCase() === "TRUE" || elecData[field].toUpperCase() === "YES" || elecData[field].toUpperCase() === "Y";
                 }
             }

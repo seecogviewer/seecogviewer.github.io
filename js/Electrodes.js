@@ -232,7 +232,7 @@ function Electrode(elecData) {
         }
 
         // Create Static Image
-        if (staticImg && this.img === null && this.row.getData()['PICS'] !== "") {
+        if (staticImg && this.img === null && this.row.getData()['PICS'] !== "" && this.row.getData()['PICS'] !== undefined && this.row.getData()['PICS'] !== null) {
             let imgDOM = imgHolder.appendImg(this.row.getData()['PICS'],this.name + '-img');
             
             let elecparent = this;

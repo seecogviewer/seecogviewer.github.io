@@ -34,12 +34,17 @@ $(document).ready(function () {
             },
             {
                 criteria: [{field: "soz", type: "=",value: true}],
-                outcome: {color: "#ff0000", size: 3},
+                outcome: {color: "red", size: 3},
                 display: true
             },
             {
                 criteria: [{field: "spikey", type: "=",value: true}],
-                outcome: {color: "#00ff00", size: 3},
+                outcome: {color: "green", size: 3},
+                display: true
+            },
+            {
+                criteria: [{field: "spread", type: "=",value: true}],
+                outcome: {color: "blue", size: 3},
                 display: true
             }
         ],

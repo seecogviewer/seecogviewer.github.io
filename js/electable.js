@@ -320,6 +320,16 @@ $(document).ready(function () {
                 cellClick: check2update
             },
             {
+                title: "SPREAD",
+                field: "spread",
+                formatter: "tickCross",
+                editable: false,
+                visible: true,
+                editor: true,
+                validator: 'unique',
+                cellClick: check2update
+            },
+            {
                 title: "SPIKEY",
                 field: "spikey",
                 formatter: "tickCross",
@@ -543,7 +553,7 @@ $(document).ready(function () {
             }
 
             // Add clinical fields
-            const neededFields = ['motor', 'sensory', 'visual', 'auditory', 'language', 'soz', 'spikey'];
+            const neededFields = ['motor', 'sensory', 'visual', 'auditory', 'language', 'soz', 'spikey','spread'];
             for (field of neededFields) {
                 if (!elecData.hasOwnProperty(field)) {
                     elecData[field] = false;

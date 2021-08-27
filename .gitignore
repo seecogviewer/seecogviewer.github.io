@@ -6,3 +6,5 @@ example_data/*
 ._*
 *.pyc
 __pycache__/*
+__pycache__
+preproc/__pycache__/seecog.cpython-37.pyc

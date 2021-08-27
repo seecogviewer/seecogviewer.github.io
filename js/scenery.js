@@ -416,9 +416,9 @@ $(document).ready(function () {
                 }
             });
         });
-        elecsFolder.add(aes,'showSelectedElecs').name('Display Selected').listen().onChange(function() {
+        //elecsFolder.add(aes,'showSelectedElecs').name('Display Selected').listen().onChange(function() {
             // Nothing yet
-        });
+        //});
 
         // Play with controls settings
         let controlsFolder = sceneGui.addFolder('Controls');

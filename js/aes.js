@@ -162,7 +162,7 @@ $(document).ready(function () {
             let dialogColumns = [
                 {title: 'Property', field: 'field'},
                 {title: 'Shape', field: 'shape', editor: 'select', editorParams: {values: {"default": "default","cube": "cube", "sphere": "sphere", "cone": "cone", "dodecahedron": "dodecahedron", "tetrahedron": "tetrahedron", "octahedron": "octahedron"} }},
-                {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple"} }},
+                {title: 'Color', field: 'color', editor: 'select', editorParams: {values: {"default": "default", "red": "red", "blue": "blue", "green": "green", "black": "black", "yellow": "yellow", "purple": "purple","orange": "orange","pink": "pink","indigo": "indigo"} }},
                 
                 // Try the color picker here
                 // TODO: How to specify "Default" as an option

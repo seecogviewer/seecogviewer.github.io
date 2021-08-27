@@ -264,7 +264,7 @@ class seecog:
             labels, ctab, names = read_annot( os.path.join(labelDir,d['source']) )
             overlay_struct = {
                 'type': 'atlas',
-                'mesh': 'lh.pial',
+                'mesh': 'lh.pial' if d['source'].startswith('lh') else 'rh.pial',
                 'data': [0 if val == -1 else val for val in labels.tolist()],
                 'ctable': ctab.tolist(),
                 'labels': [n.astype(str) for n in names],

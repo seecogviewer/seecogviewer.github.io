@@ -5,6 +5,8 @@ $(document).ready(function () {
     function planeController(obj, name, axes) {
         //debugger;
         let parentFolder = sc.datGui.objs['vol'];
+
+        // Dropdown for this particular slice
         let planeFolder = parentFolder.addFolder(name);
         let origDir = obj.slice.planeDirection;
         const originalPlaneXYZ = obj.slice.planePosition;
@@ -416,7 +418,7 @@ $(document).ready(function () {
                 }
             });
         });
-        //elecsFolder.add(aes,'showSelectedElecs').name('Display Selected').listen().onChange(function() {
+        //elecsFolder.add(aes,'showSelectedElecs').vol.Coronal.stack.minMaxname('Display Selected').listen().onChange(function() {
             // Nothing yet
         //});
 
@@ -431,6 +433,9 @@ $(document).ready(function () {
 
         let surfsFolder = sceneGui.addFolder('Surfaces');
         let volFolder = sceneGui.addFolder('Volumes');
+        // let MinMaxObj = {'min': 0,'max': 0};
+        // volFolder.add(MinMaxObj,'min',0,0,0).name('Min').listen();
+        // volFolder.add(MinMaxObj,'max',0,0,0).name('Max').listen();
         sc.datGui.objs['parent'] = sceneGui;
         sc.datGui.objs['surf'] = surfsFolder;
         sc.datGui.objs['elecs'] = elecsFolder;

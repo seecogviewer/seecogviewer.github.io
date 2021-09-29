@@ -358,6 +358,43 @@ $(document).ready(function () {
                     sc.scenes.threeD.scene.add(sc.scenes[plane].scene);
                     
                 }
+
+                // Controller for minmax
+                let minmax = vol.Coronal.stack.minMax;
+                sc.datGui.objs['vol'].add(vol.Coronal.slice,'lowerThreshold',minmax[0],minmax[1],1).name('Min').onChange(
+                    function() {
+                        vol.Axial.slice.lowerThreshold = this.getValue();
+                        vol.Sagittal.slice.lowerThreshold = this.getValue();
+                    }
+                )
+                sc.datGui.objs['vol'].add(vol.Coronal.slice,'upperThreshold',minmax[0],minmax[1],1).name('Max').onChange(
+                    function() {
+                        vol.Axial.slice.upperThreshold = this.getValue();
+                        vol.Sagittal.slice.upperThreshold = this.getValue();
+                    }
+                )
+
+
+
+                // // Controller for minmax
+                // sc.datGui.objs.vol.__controllers[0].object.min = orients.Coronal.obj.minMax[0];
+                // //sc.datGui.objs.vol.__controllers[0]__min = orients.Coronal.obj.minMax[0];
+                // sc.datGui.objs.vol.__controllers[0]__step = 1;
+                // sc.datGui.objs.vol.__controllers[1].object.max = orients.Coronal.obj.minMax[1];
+                // //sc.datGui.objs.vol.__controllers[1]__max = orients.Coronal.obj.minMax[1];
+                // sc.datGui.objs.vol.__controllers[1]__step = 1;
+                // sc.datGui.objs.vol.__controllers[0].onChange = function() {
+                //     for (v in vol) {
+                //         vol[v].slice.lowerThreshold = this.object.getValue();
+                //     }
+                // };
+                // sc.datGui.objs.vol.__controllers[1].onChange = function() {
+                //     for (v in vol) {
+                //         vol[v].slice.upperThreshold = this.object.getValue();
+                //     }
+                // };
+
+
             })
             .catch(function (error) {
                 window.console.log('oops... something went wrong...');

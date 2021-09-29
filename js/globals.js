@@ -5,13 +5,13 @@ init3 = false;
 vol = {
     'Coronal': null,
     'Sagittal': null,
-    'Axial': null,
-    'foci': {
+    'Axial': null
+    /*'foci': {
         'id': [],
         'x': [],
         'y': [],
         'z': []
-    }
+    }*/
 };
 
 sc = {

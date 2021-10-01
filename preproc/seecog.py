@@ -278,7 +278,7 @@ class seecog:
 
     def copy_seecog_files(self):
         seecogHome = os.path.dirname(self.scriptPath)
-        seecogFiles = ['index.html','js','external']
+        seecogFiles = ['index.html','js','external','style.css']
         for ff in seecogFiles:
             if os.path.isdir(seecogHome + os.sep + ff):
                 shutil.copytree(seecogHome + os.sep + ff,self.scDir + os.sep + ff)

@@ -2,49 +2,49 @@ $(document).ready(function () {
 
     //#region Aesthetics: Displaying Electrodes
     aes = {
-        default: {shape: "sphere", color: "#000000",size: 2}, //aesDefaults,
+        default: {shape: "sphere", color: "#000000",size: 1}, //aesDefaults,
         elecTextVisible: true, // Whether to show elec name hovering over elec in scenes
         showSelectedElecs: false, // Whether or not elecs selected in table and 3D scene are reflected in another
         // Custom aesthetic settings
         custom: [
             {
                 criteria: [{field: "motor", type: "=",value: true}],
-                outcome: {shape: "cube"},
+                outcome: {shape: "cube", size: 2},
                 display: true
             },
             {
                 criteria: [{field: "sensory", type: "=",value: true}],
-                outcome: {shape: "dodecahedron"},
+                outcome: {shape: "dodecahedron", size: 2},
                 display: true
             },
             {
                 criteria: [{field: "visual", type: "=",value: true}],
-                outcome: {shape: "tetrahedron"},
+                outcome: {shape: "tetrahedron", size: 2},
                 display: true
             },
             {
                 criteria: [{field: "auditory", type: "=",value: true}],
-                outcome: {shape: "cone"},
+                outcome: {shape: "cone", size: 2},
                 display: true
             },
             {
                 criteria: [{field: "language", type: "=",value: true}],
-                outcome: {shape: "octahedron"},
+                outcome: {shape: "octahedron", size: 2},
                 display: true
             },
             {
                 criteria: [{field: "soz", type: "=",value: true}],
-                outcome: {color: "red", size: 3},
+                outcome: {color: "red", size: 2},
                 display: true
             },
             {
                 criteria: [{field: "spikey", type: "=",value: true}],
-                outcome: {color: "green", size: 3},
+                outcome: {color: "green", size: 2},
                 display: true
             },
             {
                 criteria: [{field: "spread", type: "=",value: true}],
-                outcome: {color: "blue", size: 3},
+                outcome: {color: "blue", size: 2},
                 display: true
             }
         ],

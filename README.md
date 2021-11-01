@@ -1,5 +1,7 @@
-# IEEG.github.io
+# SEECOG
 3D visualization tool
+
+Hosted at [ieeg.github.io](ieeg.github.io)
 
 ## Creating SEECOG Data and Directory
 

@@ -1,8 +1,6 @@
 .DS_Store
 sample_data
 .idea/
-example_data/
-example_data/*
 ._*
 *.pyc
 __pycache__/*

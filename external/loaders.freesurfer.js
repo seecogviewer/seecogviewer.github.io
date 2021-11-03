@@ -1,3 +1,6 @@
+// This script is originally from:
+// https://github.com/FNNDSC/ami/blob/master/src/loaders/loaders.freesurfer.js
+
 'use strict';
 THREE.FreeSurferLoader = function() {};
 

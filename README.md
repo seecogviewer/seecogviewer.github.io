@@ -60,4 +60,4 @@ The following toolboxes contributed to the development of SEECOG:
 
 ### Contact Us
 
-For questions please reach out to nmarkowitz@northwell.edu or sbickel.northwell.edu
+For questions please reach out to nmarkowitz@northwell.edu or sbickel@northwell.edu

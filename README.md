@@ -3,6 +3,8 @@
 
 Hosted at [seecogviewer.github.io](seecogviewer.github.io)
 
+This tool is developed by Noah Markowitz and Dr. Stephan Bickel of The Human Brain Mapping Laboratory at NorthShore University Hospital.
+
 ## Creating SEECOG Data and Directory
 
 Before starting, make sure:
@@ -55,3 +57,7 @@ The following toolboxes contributed to the development of SEECOG:
 * [FileSaver.js](https://github.com/eligrey/FileSaver.js/)
 * [w3.css](https://www.w3schools.com/w3css/w3css_downloads.asp)
 * [w3.js](https://www.w3schools.com/w3js/)
+
+### Contact Us
+
+For questions please reach out to nmarkowitz@northwell.edu or sbickel.northwell.edu

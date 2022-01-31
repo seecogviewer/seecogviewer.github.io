@@ -3,7 +3,7 @@
 
 Hosted at [seecogviewer.github.io](seecogviewer.github.io)
 
-This tool is developed by Noah Markowitz and Dr. Stephan Bickel of The Human Brain Mapping Laboratory at NorthShore University Hospital.
+This tool is developed by Noah Markowitz and Dr. Stephan Bickel of The Human Brain Mapping Laboratory at The Feinstein Institutes for Medical Research at Northwell Health.  
 
 ## Creating SEECOG Data and Directory
 
